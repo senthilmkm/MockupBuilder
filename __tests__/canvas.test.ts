@@ -158,7 +158,14 @@ describe('Zustand Canvas State Store', () => {
   });
 
   test('should handle screenshot scale and offset variables', () => {
-    const { setScreenshotScale, setScreenshotOffsetX, setScreenshotOffsetY } = useCanvasStore.getState();
+    const { 
+      setScreenshotScale, 
+      setScreenshotOffsetX, 
+      setScreenshotOffsetY,
+      setBeforeScreenshotScale,
+      setBeforeScreenshotOffsetX,
+      setBeforeScreenshotOffsetY,
+    } = useCanvasStore.getState();
     
     expect(useCanvasStore.getState().screenshotScale).toBe(1.0);
     expect(useCanvasStore.getState().screenshotOffsetX).toBe(0);
@@ -172,6 +179,38 @@ describe('Zustand Canvas State Store', () => {
 
     setScreenshotOffsetY(-30);
     expect(useCanvasStore.getState().screenshotOffsetY).toBe(-30);
+
+    // Test Before Alignment Controls
+    expect(useCanvasStore.getState().beforeScreenshotScale).toBe(1.0);
+    expect(useCanvasStore.getState().beforeScreenshotOffsetX).toBe(0);
+    expect(useCanvasStore.getState().beforeScreenshotOffsetY).toBe(0);
+
+    setBeforeScreenshotScale(1.2);
+    expect(useCanvasStore.getState().beforeScreenshotScale).toBe(1.2);
+
+    setBeforeScreenshotOffsetX(-20);
+    expect(useCanvasStore.getState().beforeScreenshotOffsetX).toBe(-20);
+
+    setBeforeScreenshotOffsetY(40);
+    expect(useCanvasStore.getState().beforeScreenshotOffsetY).toBe(40);
+  });
+
+  test('should handle undo and redo of before screenshot alignments', () => {
+    const { setBeforeScreenshotScale, undo, redo } = useCanvasStore.getState();
+    
+    setBeforeScreenshotScale(1.0);
+    useCanvasStore.setState({ undoStack: [], redoStack: [] });
+
+    setBeforeScreenshotScale(1.8);
+    expect(useCanvasStore.getState().beforeScreenshotScale).toBe(1.8);
+    expect(useCanvasStore.getState().undoStack).toHaveLength(1);
+
+    undo();
+    expect(useCanvasStore.getState().beforeScreenshotScale).toBe(1.0);
+    expect(useCanvasStore.getState().redoStack).toHaveLength(1);
+
+    redo();
+    expect(useCanvasStore.getState().beforeScreenshotScale).toBe(1.8);
   });
 
   test('should handle undo and redo stacks correctly for sequential edits', () => {

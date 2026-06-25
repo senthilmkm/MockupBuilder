@@ -144,6 +144,11 @@ export default function SettingsScreen() {
         <TouchableOpacity style={styles.rowButton} onPress={handleClearCache}>
           <Text style={[styles.rowButtonLabel, { color: '#EF4444' }]}>Clear Project Canvas</Text>
         </TouchableOpacity>
+        <View style={styles.infoBox}>
+          <Text style={styles.infoText}>
+            ℹ️ Exported PDFs and CSV spec sheets are automatically cleared from the device cache after 7 days.
+          </Text>
+        </View>
       </View>
 
       {/* 4. Legal & Support */}
@@ -303,6 +308,19 @@ const styles = StyleSheet.create({
     color: '#F8FAFC',
     fontSize: 14,
     fontWeight: '500',
+  },
+  infoBox: {
+    backgroundColor: 'rgba(2, 132, 199, 0.04)',
+    borderColor: 'rgba(2, 132, 199, 0.15)',
+    borderWidth: 1,
+    borderRadius: 10,
+    padding: 12,
+    marginTop: 4,
+  },
+  infoText: {
+    color: '#94A3B8',
+    fontSize: 12,
+    lineHeight: 18,
   },
   versionTag: {
     color: '#475569',

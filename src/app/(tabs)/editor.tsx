@@ -46,6 +46,9 @@ export default function EditorScreen() {
     screenshotScale,
     screenshotOffsetX,
     screenshotOffsetY,
+    beforeScreenshotScale,
+    beforeScreenshotOffsetX,
+    beforeScreenshotOffsetY,
     setAspectRatio,
     setFrameType,
     setFrameColor,
@@ -56,6 +59,9 @@ export default function EditorScreen() {
     setScreenshotScale,
     setScreenshotOffsetX,
     setScreenshotOffsetY,
+    setBeforeScreenshotScale,
+    setBeforeScreenshotOffsetX,
+    setBeforeScreenshotOffsetY,
     addAnnotation,
     clearAll,
     addExportToHistory,
@@ -397,10 +403,21 @@ export default function EditorScreen() {
             {renderValueStepper('3D Tilt Rotation', rotation3D, -30, 30, 5, setRotation3D)}
             {renderValueStepper('Drop Shadow', shadowIntensity * 100, 0, 100, 10, (v) => setShadowIntensity(v / 100))}
             
-            <Text style={[styles.adjustSectionHeader, { marginTop: 16 }]}>Bezel Image Alignment</Text>
+            <Text style={[styles.adjustSectionHeader, { marginTop: 16 }]}>
+              {isSplitSliderEnabled ? 'Bezel Image (After) Alignment' : 'Bezel Image Alignment'}
+            </Text>
             {renderValueStepper('Screenshot Zoom', screenshotScale * 100, 50, 250, 10, (v) => setScreenshotScale(v / 100))}
             {renderValueStepper('Offset X (Horizontal)', screenshotOffsetX, -150, 150, 10, setScreenshotOffsetX)}
             {renderValueStepper('Offset Y (Vertical)', screenshotOffsetY, -150, 150, 10, setScreenshotOffsetY)}
+
+            {isSplitSliderEnabled && (
+              <>
+                <Text style={[styles.adjustSectionHeader, { marginTop: 16 }]}>Bezel Image (Before) Alignment</Text>
+                {renderValueStepper('Before Zoom', beforeScreenshotScale * 100, 50, 250, 10, (v) => setBeforeScreenshotScale(v / 100))}
+                {renderValueStepper('Before Offset X', beforeScreenshotOffsetX, -150, 150, 10, setBeforeScreenshotOffsetX)}
+                {renderValueStepper('Before Offset Y', beforeScreenshotOffsetY, -150, 150, 10, setBeforeScreenshotOffsetY)}
+              </>
+            )}
           </ScrollView>
         );
 

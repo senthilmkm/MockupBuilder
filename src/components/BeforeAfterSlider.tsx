@@ -4,7 +4,18 @@ import { useCanvasStore } from '@/store/canvasStore';
 import { haptics } from '@/services/haptics';
 
 export const BeforeAfterSlider: React.FC = () => {
-  const { imageUri, beforeImageUri, sliderPosition, setSliderPosition } = useCanvasStore();
+  const { 
+    imageUri, 
+    beforeImageUri, 
+    sliderPosition, 
+    setSliderPosition,
+    screenshotScale = 1.0,
+    screenshotOffsetX = 0,
+    screenshotOffsetY = 0,
+    beforeScreenshotScale = 1.0,
+    beforeScreenshotOffsetX = 0,
+    beforeScreenshotOffsetY = 0,
+  } = useCanvasStore();
   const [parentDimensions, setParentDimensions] = useState({ width: 0, height: 0 });
   const [dragStart, setDragStart] = useState<{ pageX: number; sliderPosition: number } | null>(null);
 
@@ -21,11 +32,22 @@ export const BeforeAfterSlider: React.FC = () => {
   return (
     <View style={styles.container} onLayout={onLayout}>
       {/* 1. Base Image Layer (Before) */}
-      <Image
-        source={{ uri: beforeImageUri }}
-        style={styles.fullImage}
-        resizeMode="cover"
-      />
+      <View style={styles.imageWrapper}>
+        <Image
+          source={{ uri: beforeImageUri }}
+          style={[
+            styles.fullImage,
+            {
+              transform: [
+                { scale: beforeScreenshotScale },
+                { translateX: beforeScreenshotOffsetX },
+                { translateY: beforeScreenshotOffsetY },
+              ],
+            },
+          ]}
+          resizeMode="cover"
+        />
+      </View>
       <View style={styles.beforeLabelContainer}>
         <Text style={styles.label}>Before</Text>
       </View>
@@ -34,11 +56,22 @@ export const BeforeAfterSlider: React.FC = () => {
       {pWidth > 0 && (
         <View style={[styles.overlayClip, { width: sliderLeft as DimensionValue }]}>
           {/* Inner image has the full parent dimensions to prevent squeezing */}
-          <Image
-            source={{ uri: imageUri }}
-            style={{ width: pWidth, height: pHeight }}
-            resizeMode="cover"
-          />
+          <View style={styles.imageWrapper}>
+            <Image
+              source={{ uri: imageUri }}
+              style={[
+                { width: pWidth, height: pHeight },
+                {
+                  transform: [
+                    { scale: screenshotScale },
+                    { translateX: screenshotOffsetX },
+                    { translateY: screenshotOffsetY },
+                  ],
+                },
+              ]}
+              resizeMode="cover"
+            />
+          </View>
         </View>
       )}
       <View style={styles.afterLabelContainer}>
@@ -94,6 +127,13 @@ const styles = StyleSheet.create({
     position: 'relative',
     overflow: 'hidden',
     backgroundColor: '#1E1E1E',
+  },
+  imageWrapper: {
+    width: '100%',
+    height: '100%',
+    overflow: 'hidden',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   fullImage: {
     width: '100%',

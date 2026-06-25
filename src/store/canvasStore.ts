@@ -43,6 +43,9 @@ export interface CanvasSnapshot {
   screenshotScale: number;
   screenshotOffsetX: number;
   screenshotOffsetY: number;
+  beforeScreenshotScale: number;
+  beforeScreenshotOffsetX: number;
+  beforeScreenshotOffsetY: number;
   annotations: AnnotationElement[];
 }
 
@@ -61,6 +64,9 @@ export interface CanvasState {
   screenshotScale: number; // scale (0.5 to 2.5)
   screenshotOffsetX: number; // horizontal translation
   screenshotOffsetY: number; // vertical translation
+  beforeScreenshotScale: number; // before scale (0.5 to 2.5)
+  beforeScreenshotOffsetX: number; // before horizontal translation
+  beforeScreenshotOffsetY: number; // before vertical translation
   annotations: AnnotationElement[];
   exportsHistory: ExportHistoryItem[];
   isPro: boolean;
@@ -84,6 +90,9 @@ export interface CanvasState {
   setScreenshotScale: (scale: number) => void;
   setScreenshotOffsetX: (x: number) => void;
   setScreenshotOffsetY: (y: number) => void;
+  setBeforeScreenshotScale: (scale: number) => void;
+  setBeforeScreenshotOffsetX: (x: number) => void;
+  setBeforeScreenshotOffsetY: (y: number) => void;
   setProStatus: (status: boolean) => void;
   
   // History Actions
@@ -160,6 +169,9 @@ const takeSnapshot = (state: CanvasState): CanvasSnapshot => ({
   screenshotScale: state.screenshotScale,
   screenshotOffsetX: state.screenshotOffsetX,
   screenshotOffsetY: state.screenshotOffsetY,
+  beforeScreenshotScale: state.beforeScreenshotScale,
+  beforeScreenshotOffsetX: state.beforeScreenshotOffsetX,
+  beforeScreenshotOffsetY: state.beforeScreenshotOffsetY,
   annotations: state.annotations.map((ann) => ({ ...ann })),
 });
 
@@ -180,6 +192,9 @@ export const useCanvasStore = create<CanvasState>()(
       screenshotScale: 1.0,
       screenshotOffsetX: 0,
       screenshotOffsetY: 0,
+      beforeScreenshotScale: 1.0,
+      beforeScreenshotOffsetX: 0,
+      beforeScreenshotOffsetY: 0,
       annotations: [],
       exportsHistory: [],
       isPro: false,
@@ -315,6 +330,33 @@ export const useCanvasStore = create<CanvasState>()(
         };
       }),
 
+      setBeforeScreenshotScale: (scale) => set((state) => {
+        const snapshot = takeSnapshot(state);
+        return {
+          beforeScreenshotScale: scale,
+          undoStack: [...state.undoStack, snapshot].slice(-30),
+          redoStack: [],
+        };
+      }),
+
+      setBeforeScreenshotOffsetX: (x) => set((state) => {
+        const snapshot = takeSnapshot(state);
+        return {
+          beforeScreenshotOffsetX: x,
+          undoStack: [...state.undoStack, snapshot].slice(-30),
+          redoStack: [],
+        };
+      }),
+
+      setBeforeScreenshotOffsetY: (y) => set((state) => {
+        const snapshot = takeSnapshot(state);
+        return {
+          beforeScreenshotOffsetY: y,
+          undoStack: [...state.undoStack, snapshot].slice(-30),
+          redoStack: [],
+        };
+      }),
+
       setProStatus: (status) => set({ isPro: status }),
 
       // Undo/Redo core mechanics
@@ -429,6 +471,9 @@ export const useCanvasStore = create<CanvasState>()(
           screenshotScale: 1.0,
           screenshotOffsetX: 0,
           screenshotOffsetY: 0,
+          beforeScreenshotScale: 1.0,
+          beforeScreenshotOffsetX: 0,
+          beforeScreenshotOffsetY: 0,
           frameType: 'iPhone16Pro',
           undoStack: [...state.undoStack, snapshot].slice(-30),
           redoStack: [],

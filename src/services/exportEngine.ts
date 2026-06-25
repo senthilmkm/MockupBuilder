@@ -271,6 +271,47 @@ class ExportEngineService {
       return null;
     }
   }
+
+  // 4. Automatically Evict Cached Spec Files Older Than 7 Days
+  async evictOldCachedFiles(): Promise<void> {
+    if (Platform.OS === 'web') return;
+    try {
+      const docDir = Paths.document.uri;
+      const cacheDir = FileSystem.cacheDirectory;
+      const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
+      const now = Date.now();
+
+      const cleanFolder = async (folderUri: string) => {
+        if (!folderUri) return;
+        try {
+          const files = await FileSystem.readDirectoryAsync(folderUri);
+          for (const file of files) {
+            // Target generated mockup logs and spec reports
+            if (file.toLowerCase().includes('mockup') || file.endsWith('.csv') || file.endsWith('.pdf')) {
+              const fileUri = folderUri + (folderUri.endsWith('/') ? '' : '/') + file;
+              const info = await FileSystem.getInfoAsync(fileUri);
+              if (info.exists && !info.isDirectory && info.modificationTime) {
+                const age = now - (info.modificationTime * 1000);
+                if (age > SEVEN_DAYS_MS) {
+                  await FileSystem.deleteAsync(fileUri, { idempotent: true });
+                  console.log(`Evicted old cache file: ${file}`);
+                }
+              }
+            }
+          }
+        } catch (err) {
+          console.warn(`Error reading folder ${folderUri}:`, err);
+        }
+      };
+
+      await cleanFolder(docDir);
+      if (cacheDir) {
+        await cleanFolder(cacheDir);
+      }
+    } catch (error) {
+      console.warn('Failed to evict old cache files:', error);
+    }
+  }
 }
 
 export const exportEngine = new ExportEngineService();
