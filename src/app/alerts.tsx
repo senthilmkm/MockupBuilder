@@ -91,7 +91,10 @@ export default function AlertsScreen() {
             style={styles.configBtn}
             onPress={() => {
               haptics.lightImpact();
-              router.replace('/settings');
+              router.back();
+              setTimeout(() => {
+                router.navigate('/settings');
+              }, 100);
             }}
           >
             <Text style={styles.configBtnText}>Go to Settings</Text>

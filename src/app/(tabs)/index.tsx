@@ -17,6 +17,7 @@ export default function HomeScreen() {
     setIsSplitSliderEnabled,
     setAspectRatio,
     setFrameType,
+    setBackgroundColor,
     exportsHistory,
     clearExportsHistory,
     deleteExportFromHistory,
@@ -156,9 +157,11 @@ export default function HomeScreen() {
               onPress={() => {
                 haptics.mediumImpact();
                 setAspectRatio('16:9');
-                setImageUri('https://picsum.photos/id/29/800/450');
+                setImageUri(null);
                 setBeforeImageUri(null);
                 setIsSplitSliderEnabled(false);
+                setFrameType('SafariBrowser');
+                setBackgroundColor('gradient-sunset');
                 router.push('/editor');
               }}
             >
@@ -180,9 +183,11 @@ export default function HomeScreen() {
               onPress={() => {
                 haptics.mediumImpact();
                 setAspectRatio('9:16');
-                setImageUri('https://picsum.photos/id/10/450/800');
+                setImageUri(null);
                 setBeforeImageUri(null);
                 setIsSplitSliderEnabled(false);
+                setFrameType('iPhone16Pro');
+                setBackgroundColor('gradient-cyberpunk');
                 router.push('/editor');
               }}
             >
@@ -202,9 +207,11 @@ export default function HomeScreen() {
               onPress={() => {
                 haptics.mediumImpact();
                 setAspectRatio('1:1');
-                setImageUri('https://picsum.photos/id/3/800/800');
+                setImageUri(null);
                 setBeforeImageUri(null);
                 setIsSplitSliderEnabled(false);
+                setFrameType('iPhone16Pro');
+                setBackgroundColor('gradient-midnight');
                 router.push('/editor');
               }}
             >
@@ -223,9 +230,11 @@ export default function HomeScreen() {
               onPress={() => {
                 haptics.mediumImpact();
                 setAspectRatio('4:5');
-                setImageUri('https://picsum.photos/id/48/800/1000');
+                setImageUri(null);
                 setBeforeImageUri(null);
                 setIsSplitSliderEnabled(false);
+                setFrameType('iPhone16Pro');
+                setBackgroundColor('gradient-emerald');
                 router.push('/editor');
               }}
             >
@@ -246,9 +255,11 @@ export default function HomeScreen() {
               onPress={() => {
                 haptics.mediumImpact();
                 setAspectRatio('AppStore');
-                setImageUri('https://picsum.photos/id/42/800/1200');
+                setImageUri(null);
                 setBeforeImageUri(null);
                 setIsSplitSliderEnabled(false);
+                setFrameType('iPhone16Pro');
+                setBackgroundColor('gradient-carbon');
                 router.push('/editor');
               }}
             >
@@ -267,9 +278,11 @@ export default function HomeScreen() {
               onPress={() => {
                 haptics.mediumImpact();
                 setAspectRatio('iPadStore');
-                setImageUri('https://picsum.photos/id/60/800/1066');
+                setImageUri(null);
                 setBeforeImageUri(null);
                 setIsSplitSliderEnabled(false);
+                setFrameType('SafariBrowser');
+                setBackgroundColor('gradient-ocean');
                 router.push('/editor');
               }}
             >

@@ -284,19 +284,35 @@ export default function EditorScreen() {
           
           const fileName = `Mockup_Bulk_${Date.now()}_${i + 1}.png`;
           addExportToHistory(fileName, frameType, aspectRatio, localUri);
+        } else {
+          // Web download trigger
+          try {
+            const link = window.document.createElement('a');
+            link.href = localUri;
+            link.download = `mockup_bulk_${Date.now()}_${i + 1}.png`;
+            window.document.body.appendChild(link);
+            link.click();
+            window.document.body.removeChild(link);
+          } catch (webErr) {
+            console.error('Web bulk download error:', webErr);
+          }
         }
       }
       
       haptics.success();
       useAlertsStore.getState().addAlert(
         'Bulk Export Success',
-        `Successfully saved ${total} beautified mockups to your gallery.`,
+        Platform.OS === 'web'
+          ? `Successfully downloaded ${total} beautified mockups.`
+          : `Successfully saved ${total} beautified mockups to your gallery.`,
         'Just now'
       );
       
       Alert.alert(
         'Bulk Export Complete',
-        `All ${total} screenshots were successfully converted and saved to your Photos gallery.`,
+        Platform.OS === 'web'
+          ? `All ${total} screenshots were successfully converted and downloaded to your device.`
+          : `All ${total} screenshots were successfully converted and saved to your Photos gallery.`,
         [{ text: 'Awesome' }]
       );
     } catch (err: any) {
@@ -567,7 +583,7 @@ export default function EditorScreen() {
                 ) : (
                   <View style={styles.disabledAdjustCard}>
                     <Text style={styles.disabledAdjustText}>
-                      Import your screenshot in the Home tab to adjust scaling and offsets.
+                      Import your screenshot to enable image adjustments (scale & offsets).
                     </Text>
                   </View>
                 )
@@ -646,7 +662,7 @@ export default function EditorScreen() {
             <View style={styles.watermarkRow}>
               <Text style={styles.watermarkLabel}>Enable Watermark (`made with MockupBuilder`)</Text>
               <TouchableOpacity 
-                style={[styles.watermarkToggleBtn, (!isPro || !isWatermarkEnabled) && styles.watermarkToggleBtnActive]} 
+                style={[styles.watermarkToggleBtn, (!isPro || isWatermarkEnabled) && styles.watermarkToggleBtnActive]} 
                 onPress={() => {
                   haptics.mediumImpact();
                   if (isPro) {
@@ -747,7 +763,7 @@ export default function EditorScreen() {
                   style={styles.sandboxBtn}
                   onPress={pickSingleScreenshot}
                 >
-                  <Text style={styles.sandboxBtnText}>📷 Replace Screenshot</Text>
+                  <Text style={styles.sandboxBtnText}>📷 Import Screenshot</Text>
                 </TouchableOpacity>
                 <TouchableOpacity 
                   style={[styles.sandboxBtn, styles.sandboxSplitBtn]}
