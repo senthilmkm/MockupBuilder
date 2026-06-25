@@ -1,8 +1,8 @@
 import { Tabs } from 'expo-router';
-import { useColorScheme, Image, StyleSheet } from 'react-native';
+import { useColorScheme, Image } from 'react-native';
 import { Colors } from '@/constants/theme';
 
-export default function AppTabs() {
+export default function TabsLayout() {
   const scheme = useColorScheme();
   const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
 

@@ -1,0 +1,57 @@
+{
+  "paywall": {
+    "title": "Unlock MockupBuilder Pro",
+    "subtitle": "Supercharge your screenshot layouts & stand out in feeds",
+    "billingDisclosure": "Billing is handled securely via Apple StoreKit. Subscriptions automatically renew unless disabled in iTunes Account Settings at least 24 hours prior to billing dates."
+  },
+  "appBanner": {
+    "enabled": true,
+    "title": "MockupBuilder Pro",
+    "subtitle": "Tap to view pricing & unlock features",
+    "badge": "Unlock"
+  },
+  "benefits": [
+    {
+      "title": "Remove Watermarks",
+      "description": "Export clean, branding-free mockups for professional posts."
+    },
+    {
+      "title": "All Premium Device Frames",
+      "description": "Unlock MacBook, iPad, Safari headers, and dual grid structures."
+    },
+    {
+      "title": "Advanced Spec Sheets (PDF & CSV)",
+      "description": "Compile screenshots into pitch documents and layout data sheets."
+    },
+    {
+      "title": "Spotlight Zoom & Vector Tools",
+      "description": "Highlight changes with responsive magnifiers and minimalist cogs."
+    }
+  ],
+  "plans": [
+    {
+      "id": "annual",
+      "name": "Annual Access",
+      "price": "$29.99 / Year",
+      "saving": "Save 50% ($2.50/mo equivalent)",
+      "isPopular": true,
+      "enabled": true
+    },
+    {
+      "id": "monthly",
+      "name": "Monthly Access",
+      "price": "$4.99 / Month",
+      "saving": "Cancel anytime",
+      "isPopular": false,
+      "enabled": true
+    },
+    {
+      "id": "lifetime",
+      "name": "Indie Lifetime",
+      "price": "$59.99 Once",
+      "saving": "One-time payment forever",
+      "isPopular": false,
+      "enabled": true
+    }
+  ]
+}

@@ -1,0 +1,609 @@
+import React from 'react';
+import { View, StyleSheet, Text, ScrollView, TouchableOpacity, Alert, Platform, Image } from 'react-native';
+import { router } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import * as ImagePicker from 'expo-image-picker';
+import { useCanvasStore } from '@/store/canvasStore';
+import { useAlertsStore } from '@/store/alertsStore';
+import { haptics } from '@/services/haptics';
+import { LinearGradient } from 'expo-linear-gradient';
+
+export default function HomeScreen() {
+  const insets = useSafeAreaInsets();
+  const { 
+    setImageUri, 
+    setBeforeImageUri, 
+    setIsSplitSliderEnabled,
+    setAspectRatio,
+    setFrameType,
+    exportsHistory,
+    clearExportsHistory,
+    deleteExportFromHistory,
+  } = useCanvasStore();
+
+  const [activePresetIndex, setActivePresetIndex] = React.useState(0);
+  const { alerts } = useAlertsStore();
+  const visibleAlerts = alerts.filter((alert) => alert.enabled !== false);
+  const hasUnreadAlerts = visibleAlerts.some((alert) => !alert.isRead);
+
+  const handlePresetScroll = (event: any) => {
+    const scrollOffset = event.nativeEvent.contentOffset.x;
+    const itemWidth = 132; // card width (120) + marginRight (12)
+    const index = Math.round(scrollOffset / itemWidth);
+    if (index >= 0 && index < 6) {
+      setActivePresetIndex(index);
+    }
+  };
+
+  const pickSingleScreenshot = async () => {
+    haptics.lightImpact();
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: false,
+      quality: 1,
+    });
+
+    if (!result.canceled && result.assets[0].uri) {
+      setImageUri(result.assets[0].uri);
+      setIsSplitSliderEnabled(false);
+      haptics.success();
+      // Auto redirect to Editor tab
+      router.push('/editor');
+    }
+  };
+
+  const pickSplitScreenshots = async () => {
+    haptics.lightImpact();
+    
+    // Pick Before Image
+    Alert.alert('Step 1 of 2', 'Choose the "Before" (Old design) screenshot first.', [
+      {
+        text: 'Select Image',
+        onPress: async () => {
+          const beforeResult = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ['images'],
+            allowsEditing: false,
+            quality: 1,
+          });
+
+          if (!beforeResult.canceled && beforeResult.assets[0].uri) {
+            const beforeUri = beforeResult.assets[0].uri;
+            haptics.lightImpact();
+
+            // Pick After Image
+            Alert.alert('Step 2 of 2', 'Now select the "After" (New design) screenshot.', [
+              {
+                text: 'Select Image',
+                onPress: async () => {
+                  const afterResult = await ImagePicker.launchImageLibraryAsync({
+                    mediaTypes: ['images'],
+                    allowsEditing: false,
+                    quality: 1,
+                  });
+
+                  if (!afterResult.canceled && afterResult.assets[0].uri) {
+                    setBeforeImageUri(beforeUri);
+                    setImageUri(afterResult.assets[0].uri);
+                    setIsSplitSliderEnabled(true);
+                    haptics.success();
+                    router.push('/editor');
+                  }
+                }
+              }
+            ]);
+          }
+        }
+      },
+      { text: 'Cancel', style: 'cancel' }
+    ]);
+  };
+
+  return (
+    <View style={styles.container}>
+      {/* Dynamic Header */}
+      <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
+        <Text style={styles.headerTitle}>MockupBuilder</Text>
+        <TouchableOpacity 
+          style={styles.bellButton}
+          onPress={() => { haptics.lightImpact(); router.push('/alerts'); }}
+        >
+          <Text style={styles.bellIcon}>🔔</Text>
+          {hasUnreadAlerts && <View style={styles.bellBadge} />}
+        </TouchableOpacity>
+      </View>
+
+      <ScrollView 
+        style={styles.scrollBody}
+        contentContainerStyle={{ paddingBottom: insets.bottom + 40 }}
+      >
+        {/* Call to Action Grid */}
+        <View style={styles.ctaGrid}>
+          {/* Main Action card */}
+          <TouchableOpacity onPress={pickSingleScreenshot} style={styles.cardContainer} activeOpacity={0.85}>
+            <LinearGradient
+              colors={['#1E293B', '#0F172A']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.importCardGradient}
+            >
+              <View style={styles.accentGlowBlue} />
+              <View style={styles.iconCircleBlue}>
+                <Text style={styles.importIcon}>📸</Text>
+              </View>
+              <Text style={styles.importTitle}>Beautify Screenshot</Text>
+              <Text style={styles.importSubtitle}>Add device bezels, drop shadows, and gradients</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+
+          {/* Before/After Split Card */}
+          <TouchableOpacity onPress={pickSplitScreenshots} style={styles.cardContainer} activeOpacity={0.85}>
+            <LinearGradient
+              colors={['#1E293B', '#0F172A']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={[styles.importCardGradient, styles.splitCardBorder]}
+            >
+              <View style={styles.accentGlowPurple} />
+              <View style={styles.iconCirclePurple}>
+                <Text style={styles.importIcon}>↔️</Text>
+              </View>
+              <Text style={styles.importTitle}>Before & After Slider</Text>
+              <Text style={styles.importSubtitle}>Create split crop slider comparison posts</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+        </View>
+
+        {/* Templates Presets Grid */}
+        <View style={styles.section}>
+          <Text style={styles.sectionHeader}>Quick Layout Presets</Text>
+          <ScrollView 
+            horizontal 
+            showsHorizontalScrollIndicator={false} 
+            style={styles.presetScroll}
+            decelerationRate="fast"
+            snapToInterval={132} // Width of presetCard (120) + marginRight (12)
+            snapToAlignment="start"
+            onScroll={handlePresetScroll}
+            scrollEventThrottle={16}
+          >
+            <TouchableOpacity 
+              style={styles.presetCard} 
+              onPress={() => {
+                haptics.mediumImpact();
+                setAspectRatio('16:9');
+                setImageUri('https://picsum.photos/id/29/800/450');
+                setBeforeImageUri(null);
+                setIsSplitSliderEnabled(false);
+                router.push('/editor');
+              }}
+            >
+              <View style={[styles.presetPreview, { backgroundColor: '#FF4B2B' }]} />
+              <Text style={styles.presetLabel}>X Landscape</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={styles.presetCard}
+              onPress={() => {
+                haptics.mediumImpact();
+                setAspectRatio('9:16');
+                setImageUri('https://picsum.photos/id/10/450/800');
+                setBeforeImageUri(null);
+                setIsSplitSliderEnabled(false);
+                router.push('/editor');
+              }}
+            >
+              <View style={[styles.presetPreview, { backgroundColor: '#F09819' }]} />
+              <Text style={styles.presetLabel}>Vertical Story</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={styles.presetCard}
+              onPress={() => {
+                haptics.mediumImpact();
+                setAspectRatio('1:1');
+                setImageUri('https://picsum.photos/id/3/800/800');
+                setBeforeImageUri(null);
+                setIsSplitSliderEnabled(false);
+                router.push('/editor');
+              }}
+            >
+              <View style={[styles.presetPreview, { backgroundColor: '#8E2DE2' }]} />
+              <Text style={styles.presetLabel}>LinkedIn Square</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={styles.presetCard}
+              onPress={() => {
+                haptics.mediumImpact();
+                setAspectRatio('4:5');
+                setImageUri('https://picsum.photos/id/48/800/1000');
+                setBeforeImageUri(null);
+                setIsSplitSliderEnabled(false);
+                router.push('/editor');
+              }}
+            >
+              <View style={[styles.presetPreview, { backgroundColor: '#11998E' }]} />
+              <Text style={styles.presetLabel}>Portrait Feed</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={styles.presetCard}
+              onPress={() => {
+                haptics.mediumImpact();
+                setAspectRatio('AppStore');
+                setImageUri('https://picsum.photos/id/42/800/1200');
+                setBeforeImageUri(null);
+                setIsSplitSliderEnabled(false);
+                router.push('/editor');
+              }}
+            >
+              <View style={[styles.presetPreview, { backgroundColor: '#00CDAC' }]} />
+              <Text style={styles.presetLabel}>Product Hunt Gallery</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={styles.presetCard}
+              onPress={() => {
+                haptics.mediumImpact();
+                setAspectRatio('iPadStore');
+                setImageUri('https://picsum.photos/id/60/800/1066');
+                setBeforeImageUri(null);
+                setIsSplitSliderEnabled(false);
+                router.push('/editor');
+              }}
+            >
+              <View style={[styles.presetPreview, { backgroundColor: '#3A7BD5' }]} />
+              <Text style={styles.presetLabel}>12.9" iPad Store</Text>
+            </TouchableOpacity>
+          </ScrollView>
+          <View style={styles.carouselDots}>
+            {[0, 1, 2, 3, 4, 5].map((idx) => (
+              <View 
+                key={idx} 
+                style={[
+                  styles.carouselDot, 
+                  activePresetIndex === idx && styles.carouselDotActive
+                ]} 
+              />
+            ))}
+          </View>
+        </View>
+
+        {/* Project History Log */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeaderRow}>
+            <Text style={styles.sectionHeader}>Recent Project Exports</Text>
+            {exportsHistory.length > 0 && (
+              <TouchableOpacity 
+                style={styles.clearAllBtn}
+                onPress={() => {
+                  haptics.mediumImpact();
+                  clearExportsHistory();
+                }}
+              >
+                <Text style={styles.clearAllText}>Clear All</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+          <View style={styles.historyContainer}>
+            {exportsHistory.length === 0 ? (
+              <View style={styles.emptyHistory}>
+                <Text style={styles.emptyHistoryText}>No exported designs yet</Text>
+                <Text style={styles.emptyHistorySub}>Your mockups will appear here as you save them</Text>
+              </View>
+            ) : (
+              exportsHistory.map((item) => (
+                <View key={item.id} style={styles.historyRowContainer}>
+                  <TouchableOpacity 
+                    style={styles.historyItem}
+                    onPress={() => {
+                      haptics.mediumImpact();
+                      setAspectRatio(item.aspectRatio as any);
+                      setImageUri(item.imageUri);
+                      setFrameType(item.frameType as any);
+                      setBeforeImageUri(null);
+                      setIsSplitSliderEnabled(false);
+                      router.push('/editor');
+                    }}
+                  >
+                    <Image source={{ uri: item.imageUri }} style={styles.historyThumb} resizeMode="cover" />
+                    <View style={styles.historyText}>
+                      <Text style={styles.historyTitle} numberOfLines={1}>{item.fileName}</Text>
+                      <Text style={styles.historyMeta}>
+                        {item.frameType === 'None' ? 'Flat Card' : item.frameType} • {item.aspectRatio}
+                      </Text>
+                    </View>
+                    <Text style={styles.historyTime}>
+                      {new Date(item.timestamp).toLocaleDateString()}
+                    </Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity 
+                    style={styles.deleteHistoryBtn}
+                    onPress={() => {
+                      haptics.mediumImpact();
+                      deleteExportFromHistory(item.id);
+                    }}
+                  >
+                    <Text style={styles.deleteIconText}>🗑️</Text>
+                  </TouchableOpacity>
+                </View>
+              ))
+            )}
+          </View>
+        </View>
+      </ScrollView>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#0F172A',
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderColor: '#1E293B',
+    backgroundColor: '#1E293B',
+  },
+  headerTitle: {
+    color: '#ffffff',
+    fontSize: 20,
+    fontWeight: 'bold',
+    letterSpacing: 0.5,
+  },
+  bellButton: {
+    position: 'relative',
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  bellIcon: {
+    fontSize: 18,
+  },
+  bellBadge: {
+    position: 'absolute',
+    top: 6,
+    right: 8,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#EF4444',
+  },
+  scrollBody: {
+    flex: 1,
+  },
+  ctaGrid: {
+    padding: 16,
+    gap: 12,
+  },
+  cardContainer: {
+    width: '100%',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.25,
+        shadowRadius: 10,
+      },
+      android: {
+        elevation: 6,
+      },
+    }),
+  },
+  importCardGradient: {
+    borderRadius: 14,
+    paddingVertical: 24,
+    paddingHorizontal: 20,
+    alignItems: 'center',
+    borderWidth: 1.5,
+    borderColor: '#334155',
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  splitCardBorder: {
+    borderColor: 'rgba(142, 45, 226, 0.3)',
+  },
+  accentGlowBlue: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 3,
+    backgroundColor: '#0284C7',
+  },
+  accentGlowPurple: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 3,
+    backgroundColor: '#8E2DE2',
+  },
+  iconCircleBlue: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: 'rgba(2, 132, 199, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(2, 132, 199, 0.2)',
+  },
+  iconCirclePurple: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: 'rgba(142, 45, 226, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(142, 45, 226, 0.2)',
+  },
+  importIcon: {
+    fontSize: 24,
+  },
+  importTitle: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 4,
+  },
+  importSubtitle: {
+    color: '#94A3B8',
+    fontSize: 12,
+    textAlign: 'center',
+    lineHeight: 16,
+  },
+  section: {
+    paddingTop: 16,
+    paddingHorizontal: 16,
+  },
+  sectionHeader: {
+    color: '#64748B',
+    fontSize: 11,
+    fontWeight: 'bold',
+    textTransform: 'uppercase',
+    letterSpacing: 1.2,
+    marginBottom: 12,
+  },
+  // Layout presets
+  presetScroll: {
+    flexDirection: 'row',
+  },
+  presetCard: {
+    width: 120,
+    marginRight: 12,
+    alignItems: 'center',
+  },
+  presetPreview: {
+    width: 120,
+    height: 70,
+    borderRadius: 8,
+    marginBottom: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
+  },
+  presetLabel: {
+    color: '#94A3B8',
+    fontSize: 11,
+    fontWeight: '600',
+  },
+  carouselDots: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 10,
+    marginBottom: 4,
+  },
+  carouselDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    marginHorizontal: 3,
+  },
+  carouselDotActive: {
+    width: 14,
+    backgroundColor: '#38BDF8',
+  },
+  // History log
+  sectionHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  clearAllBtn: {
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+  },
+  clearAllText: {
+    color: '#EF4444',
+    fontSize: 11,
+    fontWeight: 'bold',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
+  historyContainer: {
+    backgroundColor: '#1E293B',
+    borderRadius: 12,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: '#334155',
+  },
+  historyRowContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderBottomWidth: 1,
+    borderColor: '#334155',
+  },
+  historyItem: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+  },
+  deleteHistoryBtn: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  deleteIconText: {
+    fontSize: 16,
+  },
+  historyThumb: {
+    width: 44,
+    height: 44,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
+  },
+  historyText: {
+    flex: 1,
+    marginLeft: 12,
+    justifyContent: 'center',
+  },
+  historyTitle: {
+    color: '#F8FAFC',
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  historyMeta: {
+    color: '#64748B',
+    fontSize: 11,
+    marginTop: 2,
+  },
+  historyTime: {
+    color: '#64748B',
+    fontSize: 11,
+  },
+  emptyHistory: {
+    padding: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptyHistoryText: {
+    color: '#94A3B8',
+    fontSize: 13,
+    fontWeight: 'bold',
+    marginBottom: 4,
+  },
+  emptyHistorySub: {
+    color: '#64748B',
+    fontSize: 11,
+    textAlign: 'center',
+  },
+});

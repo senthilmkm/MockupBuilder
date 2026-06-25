@@ -1,0 +1,23 @@
+[
+  {
+    "id": "1",
+    "title": "New Bezel Frame Available!",
+    "body": "We just pushed Safari Browser bezels. Open the editor to frame your web layouts.",
+    "time": "2 hours ago",
+    "enabled": true
+  },
+  {
+    "id": "2",
+    "title": "Tip: 3D Tilts increase CTR",
+    "body": "Tweets containing tilted device screenshots receive up to 35% higher click rates. Try adjusting the Y-rotation slider!",
+    "time": "1 day ago",
+    "enabled": true
+  },
+  {
+    "id": "3",
+    "title": "MockupBuilder Pro is live!",
+    "body": "Unlock watermark removal and PDF design decks compiling options. Special launch offer available now.",
+    "time": "3 days ago",
+    "enabled": false
+  }
+]
