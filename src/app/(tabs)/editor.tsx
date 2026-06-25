@@ -1182,7 +1182,6 @@ const styles = StyleSheet.create({
   },
   ratioScroll: {
     flexDirection: 'row',
-    alignItems: 'center',
     marginTop: 10,
   },
   ratioScrollContent: {
