@@ -3,19 +3,24 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MockupPro - Device Screenshot Mockup Creator</title>
+  <title>MockupPro - Professional App Screenshot & Device Mockup Builder</title>
+  <meta name="description" content="Wrap raw app screenshots in realistic iPhone 16 Pro, MacBook Pro, and Safari Browser bezels. Personalize layouts with 3D tilts, magnifying lenses, and styled annotations.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
   <style>
     :root {
-      --bg-dark: #090d16;
-      --card-bg: rgba(17, 24, 39, 0.7);
-      --accent-blue: #38bdf8;
-      --accent-purple: #8e2de2;
+      --bg-dark: #030712;
+      --bg-surface: #0b1329;
+      --card-bg: rgba(15, 23, 42, 0.6);
+      --accent-blue: #06b6d4;
+      --accent-purple: #8b5cf6;
+      --accent-pink: #ec4899;
       --border-color: rgba(255, 255, 255, 0.08);
       --text-main: #f8fafc;
       --text-muted: #94a3b8;
+      --text-dark: #475569;
     }
 
     * {
@@ -24,374 +29,1967 @@
       padding: 0;
     }
 
+    html {
+      scroll-behavior: smooth;
+    }
+
     body {
       background-color: var(--bg-dark);
       color: var(--text-main);
       font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
       line-height: 1.6;
-      padding: 0;
       overflow-x: hidden;
     }
 
-    /* Ambient Glow backdrops */
-    .glow-top {
+    /* Radial glows */
+    .ambient-glow {
       position: absolute;
-      top: -150px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 600px;
-      height: 300px;
-      background: radial-gradient(circle, rgba(56, 189, 248, 0.15) 0%, rgba(142, 45, 226, 0.15) 50%, transparent 100%);
+      width: 800px;
+      height: 800px;
+      background: radial-gradient(circle, rgba(6, 182, 212, 0.08) 0%, rgba(139, 92, 246, 0.08) 50%, transparent 100%);
+      filter: blur(120px);
       z-index: -1;
-      filter: blur(80px);
+      pointer-events: none;
     }
+    .glow-1 { top: -200px; left: 50%; transform: translateX(-50%); }
+    .glow-2 { top: 1200px; left: -100px; }
+    .glow-3 { bottom: 200px; right: -100px; }
 
     /* Header Nav */
     header {
-      max-width: 1100px;
+      max-width: 1200px;
       margin: 0 auto;
-      padding: 24px;
+      padding: 20px 24px;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(12px);
+      background: rgba(3, 7, 18, 0.7);
+      border-bottom: 1px solid var(--border-color);
     }
 
-    .logo {
-      font-size: 20px;
-      font-weight: 800;
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-icon {
+      width: 32px;
+      height: 32px;
       background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 18px;
+      color: white;
+      box-shadow: 0 4px 12px rgba(6, 182, 212, 0.3);
+    }
+
+    .logo-text {
+      font-size: 22px;
+      font-weight: 800;
+      background: linear-gradient(135deg, #ffffff, #cbd5e1);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      letter-spacing: 0.5px;
+      letter-spacing: -0.5px;
     }
 
-    .nav-btn {
-      color: var(--text-main);
+    nav {
+      display: flex;
+      gap: 24px;
+      align-items: center;
+    }
+
+    nav a {
+      color: var(--text-muted);
       text-decoration: none;
-      font-weight: 600;
-      font-size: 13px;
-      border: 1px solid var(--border-color);
-      padding: 8px 16px;
-      border-radius: 20px;
-      background: rgba(255, 255, 255, 0.03);
-      transition: all 0.2s ease;
+      font-size: 14px;
+      font-weight: 500;
+      transition: color 0.2s ease;
     }
 
-    .nav-btn:hover {
-      background: rgba(255, 255, 255, 0.08);
-      border-color: var(--accent-blue);
+    nav a:hover {
+      color: var(--accent-blue);
+    }
+
+    .cta-button {
+      background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+      color: white;
+      text-decoration: none;
+      padding: 10px 20px;
+      border-radius: 30px;
+      font-size: 14px;
+      font-weight: 600;
+      box-shadow: 0 4px 15px rgba(139, 92, 246, 0.2);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .cta-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
     }
 
     /* Hero Section */
     .hero {
-      max-width: 800px;
-      margin: 60px auto 40px auto;
-      text-align: center;
+      max-width: 1200px;
+      margin: 80px auto 60px auto;
       padding: 0 24px;
+      text-align: center;
+      position: relative;
     }
 
-    .badge {
-      display: inline-block;
-      font-size: 11px;
-      font-weight: 700;
-      background: rgba(56, 189, 248, 0.1);
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      background: rgba(6, 182, 212, 0.08);
       color: var(--accent-blue);
-      padding: 6px 12px;
+      padding: 6px 14px;
       border-radius: 20px;
-      text-transform: uppercase;
-      letter-spacing: 1.5px;
-      border: 1px solid rgba(56, 189, 248, 0.2);
-      margin-bottom: 20px;
+      border: 1px solid rgba(6, 182, 212, 0.2);
+      margin-bottom: 24px;
+      letter-spacing: 0.5px;
+    }
+
+    .hero-badge span {
+      width: 6px;
+      height: 6px;
+      background-color: var(--accent-blue);
+      border-radius: 50%;
+      display: inline-block;
+      box-shadow: 0 0 8px var(--accent-blue);
     }
 
     h1 {
-      font-size: 46px;
+      font-size: 56px;
       font-weight: 800;
+      line-height: 1.15;
+      margin-bottom: 24px;
+      letter-spacing: -1.5px;
+    }
+
+    h1 span {
+      background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple), var(--accent-pink));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-subtitle {
+      font-size: 20px;
+      color: var(--text-muted);
+      max-width: 720px;
+      margin: 0 auto 40px auto;
+      font-weight: 400;
+    }
+
+    .app-badge-group {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 60px;
+    }
+
+    .app-store-badge {
+      background: #000000;
+      color: white;
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 10px 22px;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+
+    .app-store-badge:hover {
+      background: #111827;
+      border-color: rgba(255, 255, 255, 0.2);
+      transform: translateY(-2px);
+    }
+
+    .app-store-badge svg {
+      width: 24px;
+      height: 24px;
+      fill: currentColor;
+    }
+
+    .app-store-text {
+      text-align: left;
+    }
+
+    .app-store-text .subtext {
+      font-size: 9px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      letter-spacing: 0.5px;
+      display: block;
+      line-height: 1;
+    }
+
+    .app-store-text .maintext {
+      font-size: 16px;
+      font-weight: 600;
+      display: block;
       line-height: 1.2;
-      margin-bottom: 20px;
+    }
+
+    /* Workspace Simulation Interface */
+    .workspace-wrapper {
+      max-width: 1000px;
+      margin: 0 auto;
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 12px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 40px rgba(139, 92, 246, 0.05);
+      position: relative;
+    }
+
+    .workspace-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 16px 16px 16px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .window-dots {
+      display: flex;
+      gap: 6px;
+    }
+
+    .window-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+    .dot-red { background: #ef4444; }
+    .dot-yellow { background: #f59e0b; }
+    .dot-green { background: #10b981; }
+
+    .window-title {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 500;
+      background: rgba(255, 255, 255, 0.03);
+      padding: 4px 16px;
+      border-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.03);
+    }
+
+    .workspace-layout {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      height: 480px;
+      margin-top: 12px;
+      gap: 12px;
+    }
+
+    .sidebar-controls {
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 12px;
+      padding: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.03);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      text-align: left;
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .control-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .control-select {
+      background: #0f172a;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      color: var(--text-main);
+      padding: 8px;
+      font-size: 12px;
+      font-family: inherit;
+    }
+
+    .control-slider-mock {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #0f172a;
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      font-size: 12px;
+    }
+
+    .slider-bar-mock {
+      width: 100px;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 2px;
+      position: relative;
+    }
+
+    .slider-fill-mock {
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      width: 65%;
+      background: var(--accent-blue);
+      border-radius: 2px;
+    }
+
+    .slider-fill-mock::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: white;
+      box-shadow: 0 0 6px var(--accent-blue);
+    }
+
+    .canvas-preview {
+      background: radial-gradient(circle at center, #1e293b, #0f172a);
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.03);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* CSS floating 3D Phone Mockup inside Hero workspace */
+    .floating-mockup-wrapper {
+      perspective: 1000px;
+      animation: float 6s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0% { transform: translateY(0) rotateX(10deg) rotateY(-15deg); }
+      50% { transform: translateY(-12px) rotateX(12deg) rotateY(-10deg); }
+      100% { transform: translateY(0) rotateX(10deg) rotateY(-15deg); }
+    }
+
+    .phone-body {
+      width: 180px;
+      height: 360px;
+      background: #020617;
+      border-radius: 32px;
+      border: 6px solid #1e293b;
+      position: relative;
+      box-shadow: -15px 25px 40px rgba(0, 0, 0, 0.6), 0 0 30px rgba(6, 182, 212, 0.15);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .phone-island {
+      width: 60px;
+      height: 16px;
+      background: #020617;
+      border-radius: 8px;
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+    }
+
+    .phone-screen {
+      flex: 1;
+      background: linear-gradient(135deg, #1e1b4b, #311042);
+      padding: 24px 12px 12px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      color: white;
+    }
+
+    .mock-widget {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 10px;
+      backdrop-filter: blur(4px);
+    }
+
+    .mock-widget-header {
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--accent-blue);
+      margin-bottom: 4px;
+    }
+
+    .mock-widget-val {
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .mock-chart {
+      flex: 1;
+      display: flex;
+      align-items: flex-end;
+      gap: 6px;
+      padding: 10px 0;
+    }
+
+    .mock-chart-bar {
+      flex: 1;
+      background: linear-gradient(to top, var(--accent-purple), var(--accent-blue));
+      border-radius: 4px;
+    }
+    .bar-1 { height: 40%; }
+    .bar-2 { height: 75%; }
+    .bar-3 { height: 50%; }
+    .bar-4 { height: 90%; }
+    .bar-5 { height: 60%; }
+
+    /* Annotation graphic inside Hero mockup */
+    .hero-annotation {
+      position: absolute;
+      background: var(--accent-pink);
+      color: white;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: 6px;
+      white-space: nowrap;
+      top: 120px;
+      left: 140px;
+      z-index: 20;
+      box-shadow: 0 4px 10px rgba(236, 72, 153, 0.4);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .hero-annotation-line {
+      position: absolute;
+      width: 50px;
+      height: 2px;
+      background: var(--accent-pink);
+      top: 130px;
+      left: 100px;
+      transform: rotate(15deg);
+      z-index: 19;
+    }
+
+    .hero-annotation-dot {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      background: var(--accent-pink);
+      border-radius: 50%;
+      top: 133px;
+      left: 96px;
+      z-index: 20;
+      box-shadow: 0 0 8px var(--accent-pink);
+    }
+
+    /* Core Features Grid */
+    .features-section {
+      max-width: 1200px;
+      margin: 100px auto;
+      padding: 0 24px;
+      position: relative;
+    }
+
+    .section-header {
+      text-align: center;
+      max-width: 600px;
+      margin: 0 auto 60px auto;
+    }
+
+    .section-subtitle {
+      font-size: 15px;
+      color: var(--accent-blue);
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      margin-bottom: 12px;
+    }
+
+    .section-title-large {
+      font-size: 38px;
+      font-weight: 800;
       letter-spacing: -1px;
     }
 
-    .hero span {
-      background: linear-gradient(135deg, var(--accent-blue), #3b82f6);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .subtitle {
-      font-size: 18px;
-      color: var(--text-muted);
-      max-width: 620px;
-      margin: 0 auto 36px auto;
-    }
-
-    /* Features Grid */
-    .features-section {
-      max-width: 1100px;
-      margin: 60px auto;
-      padding: 0 24px;
-    }
-
-    .section-title {
-      font-size: 24px;
-      font-weight: 700;
-      text-align: center;
-      margin-bottom: 40px;
-      background: linear-gradient(135deg, #ffffff, #94a3b8);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .grid {
+    .features-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 20px;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 24px;
     }
 
-    .card {
+    .feature-card {
       background: var(--card-bg);
       border: 1px solid var(--border-color);
-      border-radius: 16px;
-      padding: 28px;
+      border-radius: 18px;
+      padding: 32px;
       position: relative;
       overflow: hidden;
-      transition: transform 0.3s ease, border-color 0.3s ease;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       backdrop-filter: blur(10px);
     }
 
-    .card:hover {
-      transform: translateY(-4px);
-      border-color: rgba(56, 189, 248, 0.25);
+    .feature-card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(6, 182, 212, 0.3);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.4);
     }
 
-    .card-glow {
+    .feature-card-glow {
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
-      height: 3px;
+      height: 4px;
       background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
+      opacity: 0;
+      transition: opacity 0.3s ease;
     }
 
-    .icon {
-      font-size: 24px;
-      margin-bottom: 16px;
-      width: 48px;
-      height: 48px;
-      background: rgba(255,255,255,0.03);
+    .feature-card:hover .feature-card-glow {
+      opacity: 1;
+    }
+
+    .feature-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.03);
       border: 1px solid var(--border-color);
       display: flex;
       align-items: center;
       justify-content: center;
-      border-radius: 12px;
+      font-size: 24px;
+      margin-bottom: 24px;
+      transition: background 0.3s ease;
     }
 
-    .card-title {
-      font-size: 16px;
+    .feature-card:hover .feature-icon {
+      background: rgba(6, 182, 212, 0.1);
+      border-color: rgba(6, 182, 212, 0.2);
+    }
+
+    .feature-title {
+      font-size: 18px;
       font-weight: 700;
-      margin-bottom: 8px;
-      color: #ffffff;
+      margin-bottom: 12px;
+      color: white;
     }
 
-    .card-desc {
-      font-size: 13px;
+    .feature-desc {
+      font-size: 14px;
       color: var(--text-muted);
       line-height: 1.6;
     }
 
-    /* Subscriptions / Benefits */
-    .pro-section {
-      max-width: 900px;
-      margin: 80px auto;
-      background: linear-gradient(135deg, rgba(56, 189, 248, 0.04), rgba(142, 45, 226, 0.04));
-      border: 1px solid rgba(56, 189, 248, 0.15);
-      border-radius: 24px;
-      padding: 40px;
-      text-align: center;
+    /* Interactive Demo Playground Section */
+    .demo-section {
+      background: var(--bg-surface);
+      border-top: 1px solid var(--border-color);
+      border-bottom: 1px solid var(--border-color);
+      padding: 100px 24px;
       position: relative;
     }
 
-    .pro-badge {
-      position: absolute;
-      top: -14px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
-      color: #ffffff;
-      font-size: 10px;
-      font-weight: 700;
-      padding: 6px 16px;
-      border-radius: 20px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
+    .demo-container {
+      max-width: 1100px;
+      margin: 0 auto;
     }
 
-    .pro-title {
-      font-size: 22px;
+    /* Tab Switchers */
+    .demo-tabs {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 50px;
+    }
+
+    .demo-tab-btn {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 12px 24px;
+      border-radius: 30px;
+      cursor: pointer;
+      font-family: inherit;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.2s ease;
+    }
+
+    .demo-tab-btn:hover {
+      background: rgba(255, 255, 255, 0.06);
+      color: white;
+    }
+
+    .demo-tab-btn.active {
+      background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+      color: white;
+      border-color: transparent;
+      box-shadow: 0 4px 15px rgba(6, 182, 212, 0.25);
+    }
+
+    .demo-content-panel {
+      display: none;
+      animation: fadeIn 0.4s ease-in-out forwards;
+    }
+
+    .demo-content-panel.active {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      align-items: center;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .demo-explanation {
+      text-align: left;
+    }
+
+    .demo-tag {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--accent-blue);
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+      display: inline-block;
+    }
+
+    .demo-headline {
+      font-size: 28px;
+      font-weight: 800;
+      margin-bottom: 20px;
+      line-height: 1.3;
+    }
+
+    .demo-desc {
+      color: var(--text-muted);
+      font-size: 15px;
+      margin-bottom: 30px;
+      line-height: 1.6;
+    }
+
+    .demo-showcase-box {
+      background: #060913;
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      height: 380px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
+    }
+
+    /* Live Switchable Bezel Elements */
+    .switchable-device {
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Custom CSS Mockups */
+    .css-iphone {
+      width: 170px;
+      height: 310px;
+      background: #0f172a;
+      border: 8px solid #334155;
+      border-radius: 28px;
+      position: relative;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+      overflow: hidden;
+    }
+
+    .css-iphone .dynamic-island {
+      width: 50px;
+      height: 12px;
+      background: black;
+      border-radius: 6px;
+      position: absolute;
+      top: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+    }
+
+    .css-iphone .screen-content {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #10b981, #06b6d4);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      color: white;
+    }
+
+    .css-macbook {
+      width: 320px;
+      height: 200px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .css-macbook .macbook-screen {
+      width: 290px;
+      height: 170px;
+      background: #1e293b;
+      border: 8px solid #0f172a;
+      border-radius: 10px 10px 0 0;
+      overflow: hidden;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+    }
+
+    .css-macbook .macbook-screen-content {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .css-macbook .macbook-base {
+      width: 320px;
+      height: 8px;
+      background: #475569;
+      border-radius: 0 0 6px 6px;
+      position: relative;
+    }
+
+    .css-macbook .macbook-base::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 40px;
+      height: 4px;
+      background: #1e293b;
+      border-radius: 0 0 4px 4px;
+    }
+
+    .css-safari {
+      width: 300px;
+      height: 190px;
+      background: #1e293b;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 15px 30px rgba(0,0,0,0.4);
+      border: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .css-safari .safari-header {
+      height: 28px;
+      background: #0f172a;
+      display: flex;
+      align-items: center;
+      padding: 0 10px;
+      gap: 6px;
+    }
+
+    .css-safari .safari-dots {
+      display: flex;
+      gap: 4px;
+    }
+
+    .css-safari .safari-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+    }
+
+    .css-safari .safari-address {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 4px;
+      font-size: 9px;
+      color: var(--text-muted);
+      flex: 1;
+      height: 16px;
+      margin-left: 15px;
+      display: flex;
+      align-items: center;
+      padding-left: 8px;
+    }
+
+    .css-safari .safari-content {
+      flex: 1;
+      background: linear-gradient(135deg, #f43f5e, #e11d48);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .switcher-btn-group {
+      display: flex;
+      gap: 10px;
+    }
+
+    .switch-selector {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border-color);
+      padding: 10px 16px;
+      border-radius: 8px;
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .switch-selector:hover {
+      background: rgba(255,255,255,0.06);
+      color: white;
+    }
+
+    .switch-selector.active {
+      border-color: var(--accent-blue);
+      color: var(--accent-blue);
+      background: rgba(6, 182, 212, 0.05);
+    }
+
+    /* Live Interactive Before/After Split Slider */
+    .slider-playground {
+      width: 320px;
+      height: 260px;
+      border-radius: 12px;
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+      border: 2px solid var(--border-color);
+    }
+
+    .slider-before, .slider-after {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Raw Screenshot */
+    .slider-before {
+      background: #1e293b;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .raw-app-mock {
+      width: 130px;
+      height: 200px;
+      background: white;
+      color: #334155;
+      border-radius: 8px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-size: 8px;
+    }
+
+    .raw-bar {
+      height: 8px;
+      background: #e2e8f0;
+      border-radius: 4px;
+    }
+
+    /* Stylized Premium Mockup */
+    .slider-after {
+      background: radial-gradient(circle, #2563eb, #1e3a8a);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 50%; /* JS toggles this */
+      overflow: hidden;
+      z-index: 2;
+    }
+
+    .slider-after .mockup-inner {
+      width: 320px; /* Lock initial width for alignment */
+      height: 260px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: absolute;
+      left: 0;
+      top: 0;
+    }
+
+    .slider-after-device {
+      width: 110px;
+      height: 190px;
+      background: #020617;
+      border-radius: 18px;
+      border: 4px solid #475569;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .slider-after-device-screen {
+      flex: 1;
+      background: #1e1b4b;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .slider-after-device-screen .raw-bar {
+      background: var(--accent-blue);
+    }
+
+    .slider-drag-line {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 50%; /* JS toggles this */
+      width: 2px;
+      background: white;
+      z-index: 5;
+      pointer-events: none;
+      box-shadow: 0 0 8px rgba(255,255,255,0.8);
+    }
+
+    .slider-drag-handle {
+      position: absolute;
+      top: 50%;
+      left: 50%; /* JS toggles this */
+      transform: translate(-50%, -50%);
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: white;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      z-index: 6;
+      pointer-events: none;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    }
+
+    .slider-control-input {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      cursor: ew-resize;
+      z-index: 10;
+    }
+
+    /* Live Interactive Magnifying spotlight simulation */
+    .magnify-box {
+      width: 240px;
+      height: 240px;
+      background: linear-gradient(135deg, #1e1b4b, #311042);
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      position: relative;
+      cursor: crosshair;
+      overflow: hidden;
+    }
+
+    .magnify-grid-pattern {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background-size: 16px 16px;
+      background-image: linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                        linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    }
+
+    .magnify-target-text {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      width: 80%;
+      line-height: 1.4;
+    }
+
+    .magnify-glass {
+      position: absolute;
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      border: 3px solid var(--accent-blue);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.5), inset 0 0 10px rgba(0,0,0,0.3);
+      top: 30px;
+      left: 30px;
+      pointer-events: none;
+      background: radial-gradient(circle, rgba(6, 182, 212, 0.15) 0%, transparent 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transform: scale(1);
+      transition: transform 0.2s ease;
+    }
+
+    .magnify-glass-center {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent-blue);
+      box-shadow: 0 0 8px var(--accent-blue);
+    }
+
+    .magnify-text-expanded {
+      color: white;
+      font-size: 16px;
+      font-weight: 800;
+      text-transform: uppercase;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+      position: absolute;
+      top: -30px; /* Toggled on hover */
+      transition: all 0.2s ease;
+    }
+
+    /* Comparison Specifications Matrix */
+    .pricing-section {
+      max-width: 1200px;
+      margin: 100px auto;
+      padding: 0 24px;
+    }
+
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+      max-width: 900px;
+      margin: 50px auto 0 auto;
+    }
+
+    .pricing-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 40px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      backdrop-filter: blur(10px);
+    }
+
+    .pricing-card.popular {
+      border-color: rgba(139, 92, 246, 0.4);
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.05), rgba(6, 182, 212, 0.05)), var(--card-bg);
+      box-shadow: 0 20px 40px rgba(139, 92, 246, 0.05);
+    }
+
+    .pricing-tag {
+      position: absolute;
+      top: -14px;
+      right: 30px;
+      background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink));
+      color: white;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .pricing-name {
+      font-size: 20px;
       font-weight: 700;
       margin-bottom: 12px;
     }
 
-    .pro-desc {
+    .pricing-price {
+      font-size: 40px;
+      font-weight: 800;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: baseline;
+    }
+
+    .pricing-price span {
+      font-size: 14px;
+      color: var(--text-muted);
+      font-weight: 500;
+      margin-left: 4px;
+    }
+
+    .pricing-desc {
       font-size: 14px;
       color: var(--text-muted);
       margin-bottom: 30px;
-      max-width: 500px;
-      margin-left: auto;
-      margin-right: auto;
     }
 
-    .pro-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 20px;
-      margin-bottom: 24px;
+    .pricing-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 40px;
+      flex: 1;
+      text-align: left;
     }
 
-    .pro-benefit {
-      font-size: 13px;
-      font-weight: 600;
-      color: #f8fafc;
+    .pricing-item {
+      font-size: 14px;
       display: flex;
       align-items: center;
-      justify-content: center;
-      gap: 8px;
+      gap: 10px;
     }
 
-    .pro-benefit span {
+    .pricing-item.checked svg {
       color: var(--accent-blue);
+    }
+
+    .pricing-item.unchecked {
+      color: var(--text-dark);
+    }
+
+    .pricing-item.unchecked svg {
+      color: var(--text-dark);
+    }
+
+    .pricing-btn {
+      width: 100%;
+      text-align: center;
+      padding: 14px;
+      border-radius: 30px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid var(--border-color);
+      background: rgba(255,255,255,0.03);
+      color: white;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+
+    .pricing-btn:hover {
+      background: rgba(255,255,255,0.08);
+      border-color: white;
+    }
+
+    .pricing-card.popular .pricing-btn {
+      background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+      border: none;
+    }
+
+    .pricing-card.popular .pricing-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+    }
+
+    /* Accordion FAQ section */
+    .faq-section {
+      max-width: 800px;
+      margin: 100px auto;
+      padding: 0 24px;
+    }
+
+    .faq-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-top: 50px;
+    }
+
+    .faq-item {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      overflow: hidden;
+      transition: border-color 0.2s ease;
+    }
+
+    .faq-item:hover {
+      border-color: rgba(255,255,255,0.15);
+    }
+
+    .faq-header {
+      width: 100%;
+      text-align: left;
+      background: none;
+      border: none;
+      color: white;
+      padding: 20px 24px;
       font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: inherit;
+    }
+
+    .faq-icon-arrow {
+      width: 20px;
+      height: 20px;
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      color: var(--text-muted);
+    }
+
+    .faq-item.active .faq-icon-arrow {
+      transform: rotate(180deg);
+      color: var(--accent-blue);
+    }
+
+    .faq-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      padding: 0 24px;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    .faq-item.active .faq-content {
+      padding-bottom: 20px;
     }
 
     /* Footer Links */
     footer {
       border-top: 1px solid var(--border-color);
-      padding: 40px 24px;
-      text-align: center;
-      margin-top: 80px;
-      background: #06090e;
+      padding: 60px 24px 40px 24px;
+      background: #02040a;
+      margin-top: 120px;
     }
 
-    .footer-links {
+    .footer-grid {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr;
+      gap: 40px;
+      text-align: left;
+      margin-bottom: 40px;
+    }
+
+    .footer-brand {
       display: flex;
-      justify-content: center;
-      gap: 24px;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .footer-tagline {
+      font-size: 14px;
+      color: var(--text-muted);
+      max-width: 280px;
+    }
+
+    .footer-column-title {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: white;
       margin-bottom: 20px;
     }
 
-    .footer-links a {
+    .footer-column-links {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .footer-column-links a {
       color: var(--text-muted);
       text-decoration: none;
-      font-size: 13px;
-      font-weight: 500;
+      font-size: 14px;
       transition: color 0.2s ease;
     }
 
-    .footer-links a:hover {
+    .footer-column-links a:hover {
       color: var(--accent-blue);
     }
 
+    .footer-bottom {
+      max-width: 1200px;
+      margin: 0 auto;
+      border-top: 1px solid var(--border-color);
+      padding-top: 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      color: var(--text-dark);
+    }
+
     .copyright {
-      font-size: 11px;
-      color: #475569;
+      color: var(--text-dark);
     }
 
     @media (max-width: 768px) {
-      h1 { font-size: 34px; }
-      .hero { margin-top: 40px; }
-      .pro-section { padding: 30px 20px; }
+      h1 { font-size: 38px; }
+      .hero-subtitle { font-size: 16px; }
+      .workspace-layout { grid-template-columns: 1fr; height: auto; }
+      .sidebar-controls { display: none; }
+      .demo-content-panel.active { grid-template-columns: 1fr; gap: 30px; }
+      .pricing-grid { grid-template-columns: 1fr; }
+      .footer-grid { grid-template-columns: 1fr; gap: 30px; }
+      .footer-bottom { flex-direction: column; gap: 15px; text-align: center; }
     }
   </style>
 </head>
 <body>
-  <div class="glow-top"></div>
-  
+  <div class="ambient-glow glow-1"></div>
+  <div class="ambient-glow glow-2"></div>
+  <div class="ambient-glow glow-3"></div>
+
+  <!-- Header Navigation -->
   <header>
-    <div class="logo">MockupPro</div>
-    <a href="support.html" class="nav-btn">Get Support</a>
+    <div class="logo-container">
+      <div class="logo-icon">M</div>
+      <div class="logo-text">MockupPro</div>
+    </div>
+    <nav>
+      <a href="#features">Features</a>
+      <a href="#demo">Interactive Demo</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#faq">FAQ</a>
+      <a href="support.html" class="cta-button">
+        Support Center
+      </a>
+    </nav>
   </header>
 
+  <!-- Hero Section -->
   <section class="hero">
-    <div class="badge">App Store Assets Generator</div>
-    <h1>Create Premium <span>Device Mockups</span> in Seconds</h1>
-    <p class="subtitle">Wrap your raw screenshots in realistic iPhone, MacBook, and Safari Browser bezels. Personalize layouts with 3D tilts, shadows, and vector markups.</p>
-  </section>
+    <div class="hero-badge">
+      <span></span> Wrap screenshots in realistic device shells
+    </div>
+    <h1>Create Premium <span>App Mockups</span><br>For App Store & Pitch Decks</h1>
+    <p class="hero-subtitle">
+      Wrap your raw screenshots in high-fidelity iPhone 16 Pro, MacBook Pro, and Safari Browser frame bezels. Align layouts with 3D tilts, customizable shadows, text overlays, and vector markups.
+    </p>
 
-  <section class="features-section">
-    <div class="section-title">Core Studio Toolkit</div>
-    <div class="grid">
+    <!-- App Store Badge -->
+    <div class="app-badge-group">
+      <a href="https://apps.apple.com" class="app-store-badge">
+        <svg viewBox="0 0 384 512">
+          <path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-48.7-22.7-77.4-22.2-38.2.6-77.5 22.5-97 56.2-39.6 68.6-10.2 169.3 28.3 224.2 19 27.2 41.4 57.4 71.3 56.2 28.9-1.2 39.8-18.6 74.8-18.6 34.8 0 44.9 18.6 75.2 18 30.9-.6 50.8-27.5 69.7-55 21.9-32 31-62.9 31.4-64.5-1.4-.6-60-23-60.6-90.4zm-60.7-184.9c15.8-19 26.6-45.5 23.7-72-22.4 1-49.6 15.1-65.7 34-14.1 16.2-26.6 43.1-23.3 68.9 25 2 50-12 65.3-30.9z"/>
+        </svg>
+        <div class="app-store-text">
+          <span class="subtext">Download on the</span>
+          <span class="maintext">App Store</span>
+        </div>
+      </a>
+    </div>
+
+    <!-- Active Studio Interface Simulation -->
+    <div class="workspace-wrapper">
+      <div class="workspace-header">
+        <div class="window-dots">
+          <div class="window-dot dot-red"></div>
+          <div class="window-dot dot-yellow"></div>
+          <div class="window-dot dot-green"></div>
+        </div>
+        <div class="window-title">MockupPro Canvas Studio</div>
+        <div style="width: 48px;"></div>
+      </div>
       
-      <!-- Card 1 -->
-      <div class="card">
-        <div class="card-glow"></div>
-        <div class="icon">📱</div>
-        <div class="card-title">Dynamic Bezels & Ratios</div>
-        <div class="card-desc">Frame screenshots inside iPhone 16 Pro, MacBook, Safari, or Flat cards. Resize canvas instantly to fit Instagram, LinkedIn, App Store, or iPad formats.</div>
-      </div>
+      <div class="workspace-layout">
+        <!-- Mock controls -->
+        <div class="sidebar-controls">
+          <div class="control-group">
+            <span class="control-label">Device Shell Bezel</span>
+            <select class="control-select">
+              <option>iPhone 16 Pro (Deep Space)</option>
+              <option>MacBook Pro (Space Gray)</option>
+              <option>Safari Web Browser</option>
+            </select>
+          </div>
+          <div class="control-group">
+            <span class="control-label">Perspective 3D Yaw</span>
+            <div class="control-slider-mock">
+              <span>-15°</span>
+              <div class="slider-bar-mock"><div class="slider-fill-mock"></div></div>
+            </div>
+          </div>
+          <div class="control-group">
+            <span class="control-label">Canvas Background</span>
+            <select class="control-select">
+              <option>Aurora Dusk Gradient</option>
+              <option>Neon Amber Radial</option>
+              <option>Transparent Alpha</option>
+            </select>
+          </div>
+          <div class="control-group">
+            <span class="control-label">Drop Shadow Blur</span>
+            <div class="control-slider-mock">
+              <span>32px</span>
+              <div class="slider-bar-mock"><div class="slider-fill-mock" style="width:80%"></div></div>
+            </div>
+          </div>
+        </div>
 
-      <!-- Card 2 -->
-      <div class="card">
-        <div class="card-glow"></div>
-        <div class="icon">📐</div>
-        <div class="card-title">3D Perspective Tilts</div>
-        <div class="card-desc">Adjust 3D rotation, canvas padding, and drop-shadow depth in real-time. Use precise alignment steppers to zoom and center mockups inside bezels.</div>
+        <!-- Simulated canvas rendering a 3D float device and text annotation pointer -->
+        <div class="canvas-preview">
+          <div class="floating-mockup-wrapper">
+            <div class="phone-body">
+              <div class="phone-island"></div>
+              <div class="phone-screen">
+                <div class="mock-widget">
+                  <div class="mock-widget-header">Weekly Installs</div>
+                  <div class="mock-widget-val">+1,480</div>
+                </div>
+                <div class="mock-chart">
+                  <div class="mock-chart-bar bar-1"></div>
+                  <div class="mock-chart-bar bar-2"></div>
+                  <div class="mock-chart-bar bar-3"></div>
+                  <div class="mock-chart-bar bar-4"></div>
+                  <div class="mock-chart-bar bar-5"></div>
+                </div>
+              </div>
+            </div>
+            <!-- Annotation tag with connecting vector line overlay -->
+            <div class="hero-annotation">
+              🔍 Mag Spotlight Tool
+            </div>
+            <div class="hero-annotation-line"></div>
+            <div class="hero-annotation-dot"></div>
+          </div>
+        </div>
       </div>
-
-      <!-- Card 3 -->
-      <div class="card">
-        <div class="card-glow"></div>
-        <div class="icon">↔️</div>
-        <div class="card-title">Before & After Comparisons</div>
-        <div class="card-desc">Load dual comparison screenshots and overlay an interactive sliding divider handle to highlight changes with independent image scaling controls.</div>
-      </div>
-
-      <!-- Card 4 -->
-      <div class="card">
-        <div class="card-glow"></div>
-        <div class="icon">✍️</div>
-        <div class="card-title">Rich Annotations Layer</div>
-        <div class="card-desc">Superimpose styled text tags, adjustable vector pointers, and spotlight zoom magnifying lenses. Move and rotate annotations dynamically.</div>
-      </div>
-
-      <!-- Card 5 -->
-      <div class="card">
-        <div class="card-glow"></div>
-        <div class="icon">↩️</div>
-        <div class="card-title">Zustand Undo/Redo Engine</div>
-        <div class="card-desc">Revert or reapply actions sequentially. Every edit, slide, and markup is recorded in the history stack, ensuring a frustration-free design workflow.</div>
-      </div>
-
-      <!-- Card 6 -->
-      <div class="card">
-        <div class="card-glow"></div>
-        <div class="icon">📤</div>
-        <div class="card-title">Professional Spec Exports</div>
-        <div class="card-desc">Export flattened high-res PNG mockups, multi-page PDF pitch decks, or CSV data tables documenting precise annotation coordinates.</div>
-      </div>
-
     </div>
   </section>
 
-  <section class="pro-section">
-    <div class="pro-badge">MockupPro Premium</div>
-    <div class="pro-title">Unlock Full Design Power</div>
-    <p class="pro-desc">Gain access to all locked templates, remove watermark branding, and generate spec sheets with Apple StoreKit-backed subscriptions.</p>
-    
-    <div class="pro-grid">
-      <div class="pro-benefit"><span>✓</span> No Watermarks</div>
-      <div class="pro-benefit"><span>✓</span> Safari Header Bezels</div>
-      <div class="pro-benefit"><span>✓</span> App Store Ratios</div>
-      <div class="pro-benefit"><span>✓</span> Vector Arrow Annotations</div>
+  <!-- Core Studio Toolkit -->
+  <section class="features-section" id="features">
+    <div class="section-header">
+      <div class="section-subtitle">Studio Features</div>
+      <h2 class="section-title-large">Pro-Grade Canvas Utilities</h2>
+    </div>
+
+    <div class="features-grid">
+      <!-- Feature 1 -->
+      <div class="feature-card">
+        <div class="feature-card-glow"></div>
+        <div class="feature-icon">📱</div>
+        <h3 class="feature-title">Dynamic Bezels & Ratios</h3>
+        <p class="feature-desc">Frame screen designs in Apple iPhone 16 Pro, MacBook Pro, Safari headers, or generic flat cards. Instantly export to App Store, Instagram, or LinkedIn aspect ratios.</p>
+      </div>
+
+      <!-- Feature 2 -->
+      <div class="feature-card">
+        <div class="feature-card-glow"></div>
+        <div class="feature-icon">📐</div>
+        <h3 class="feature-title">3D Perspective Yaw & Roll</h3>
+        <p class="feature-desc">Rotate devices along X, Y, and Z axes. Perfect alignment controls let you specify custom canvas padding, corner radius, and drop shadow blur vectors.</p>
+      </div>
+
+      <!-- Feature 3 -->
+      <div class="feature-card">
+        <div class="feature-card-glow"></div>
+        <div class="feature-icon">↔️</div>
+        <h3 class="feature-title">Before/After Comparison</h3>
+        <p class="feature-desc">Import dual screenshot versions to display changes side-by-side. Overlay an interactive slider bar with separate canvas alignments for updates comparison.</p>
+      </div>
+
+      <!-- Feature 4 -->
+      <div class="feature-card">
+        <div class="feature-card-glow"></div>
+        <div class="feature-icon">✍️</div>
+        <h3 class="feature-title">Styled Vector Annotations</h3>
+        <p class="feature-desc">Superimpose customizable callout cards, adjustable connecting arrows, and magnification spotlight circle lenses. Draw attention to critical app UI changes.</p>
+      </div>
+
+      <!-- Feature 5 -->
+      <div class="feature-card">
+        <div class="feature-card-glow"></div>
+        <div class="feature-icon">↩️</div>
+        <h3 class="feature-title">Zustand History Stack</h3>
+        <p class="feature-desc">Enjoy full undo/redo capabilities for all edits. Keep structural design stages saved locally on the history stack, enabling stress-free experimentation.</p>
+      </div>
+
+      <!-- Feature 6 -->
+      <div class="feature-card">
+        <div class="feature-card-glow"></div>
+        <div class="feature-icon">📤</div>
+        <h3 class="feature-title">Developer Spec Exports</h3>
+        <p class="feature-desc">Export final mockups as high-resolution PNGs, compile pitch decks into multi-page PDF files, or download CSV logs documenting the coordinate grids of vector pointers.</p>
+      </div>
     </div>
   </section>
 
+  <!-- Interactive Demo Section -->
+  <section class="demo-section" id="demo">
+    <div class="demo-container">
+      <div class="section-header">
+        <div class="section-subtitle">Live Playground</div>
+        <h2 class="section-title-large">Interactive Studio Preview</h2>
+      </div>
+
+      <div class="demo-tabs">
+        <button class="demo-tab-btn active" onclick="switchDemoTab(event, 'bezel-switcher')">1. Bezel Switcher</button>
+        <button class="demo-tab-btn" onclick="switchDemoTab(event, 'slider-compare')">2. Before/After Slider</button>
+        <button class="demo-tab-btn" onclick="switchDemoTab(event, 'spotlight-magnify')">3. Spotlight Magnifier</button>
+      </div>
+
+      <!-- Tab 1: Bezel Switcher -->
+      <div class="demo-content-panel active" id="bezel-switcher">
+        <div class="demo-explanation">
+          <span class="demo-tag">Feature Demo</span>
+          <h3 class="demo-headline">Switch Bezels with One Click</h3>
+          <p class="demo-desc">
+            Instantly wrap your raw UI layout mockup inside different high-fidelity shells. Try toggling between iPhone, MacBook, and Safari below to see how MockupPro renders frames in real-time.
+          </p>
+          <div class="switcher-btn-group">
+            <button class="switch-selector active" onclick="changeLiveBezel('iphone')">📱 iPhone 16 Pro</button>
+            <button class="switch-selector" onclick="changeLiveBezel('macbook')">💻 MacBook Pro</button>
+            <button class="switch-selector" onclick="changeLiveBezel('safari')">🌐 Safari Browser</button>
+          </div>
+        </div>
+        <div class="demo-showcase-box">
+          <!-- Switchable mockup -->
+          <div class="switchable-device" id="liveDeviceContainer">
+            <!-- Initial state: iPhone -->
+            <div class="css-iphone">
+              <div class="dynamic-island"></div>
+              <div class="screen-content" style="background: linear-gradient(135deg, #10b981, #06b6d4);">
+                <div style="font-size: 28px; margin-bottom: 8px;">📊</div>
+                <div style="font-weight: 700; font-size: 14px;">Mobile CRM</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 2: Slider Comparison -->
+      <div class="demo-content-panel" id="slider-compare">
+        <div class="demo-explanation">
+          <span class="demo-tag">Feature Demo</span>
+          <h3 class="demo-headline">Draggable Before/After Compare</h3>
+          <p class="demo-desc">
+            Give customers or developers a clear slider that highlights screen transformations. Drag the slider on the preview right to toggle between a raw screenshot and the beautifully styled mockup.
+          </p>
+        </div>
+        <div class="demo-showcase-box">
+          <div class="slider-playground">
+            <!-- Raw Screenshot (Before) -->
+            <div class="slider-before">
+              <div class="raw-app-mock">
+                <div style="font-weight: 700; font-size: 9px; color: #475569;">CRM Dashboard</div>
+                <div class="raw-bar" style="width: 80%"></div>
+                <div class="raw-bar" style="width: 50%"></div>
+                <div class="raw-bar" style="width: 90%"></div>
+              </div>
+            </div>
+
+            <!-- Stylized Mockup wrapper (After) -->
+            <div class="slider-after" id="sliderAfterLayer">
+              <div class="slider-after-inner">
+                <div class="slider-after-device">
+                  <div class="slider-after-device-screen">
+                    <div style="font-weight: 700; font-size: 9px; color: white;">Analytics Pro</div>
+                    <div class="raw-bar" style="width: 80%"></div>
+                    <div class="raw-bar" style="width: 50%"></div>
+                    <div class="raw-bar" style="width: 90%"></div>
+                    <div class="raw-bar" style="width: 70%"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Draggable divider control line -->
+            <div class="slider-drag-line" id="sliderDragLine"></div>
+            <div class="slider-drag-handle" id="sliderDragHandle">↔</div>
+            <input type="range" min="0" max="100" value="50" class="slider-control-input" id="demoCompareSlider" oninput="handleSliderDrag(this.value)">
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 3: Spotlight Magnify -->
+      <div class="demo-content-panel" id="spotlight-magnify">
+        <div class="demo-explanation">
+          <span class="demo-tag">Feature Demo</span>
+          <h3 class="demo-headline">Spotlight Magnification Lenses</h3>
+          <p class="demo-desc">
+            Focus attention on crucial fields or UI adjustments. Drag your mouse or finger over the canvas on the right to simulate the vector magnifying lens, highlighting micro-details in high definition.
+          </p>
+        </div>
+        <div class="demo-showcase-box">
+          <div class="magnify-box" id="magnifyBox" onmousemove="handleMagnifyMove(event)" onmouseleave="handleMagnifyLeave()">
+            <div class="magnify-grid-pattern"></div>
+            <div class="magnify-target-text">Hover here to look under the magnification lens</div>
+            <div class="magnify-glass" id="magnifyGlass">
+              <div class="magnify-text-expanded" id="magnifyText">ZOOMED</div>
+              <div class="magnify-glass-center"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing packages matrix -->
+  <section class="pricing-section" id="pricing">
+    <div class="section-header">
+      <div class="section-subtitle">Pricing Options</div>
+      <h2 class="section-title-large">Simple, Flexible Design Plans</h2>
+    </div>
+
+    <div class="pricing-grid">
+      <!-- Free Plan -->
+      <div class="pricing-card">
+        <div class="pricing-name">Starter Edition</div>
+        <div class="pricing-price">$0<span>/ forever</span></div>
+        <p class="pricing-desc">Perfect for testing bezels, basic annotations, and simple mock exports.</p>
+        <ul class="pricing-list">
+          <li class="pricing-item checked">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            Standard iPhone Shell Bezel
+          </li>
+          <li class="pricing-item checked">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            Adjustable 3D Tilts (Yaw/Roll)
+          </li>
+          <li class="pricing-item checked">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            Standard Text Label Annotations
+          </li>
+          <li class="pricing-item unchecked">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            No Watermarks on Export
+          </li>
+          <li class="pricing-item unchecked">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            MacBook Pro & Safari Bezels
+          </li>
+          <li class="pricing-item unchecked">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            Vector Connecting Arrows
+          </li>
+        </ul>
+        <a href="https://apps.apple.com" class="pricing-btn">Get Free Version</a>
+      </div>
+
+      <!-- Pro Premium Plan -->
+      <div class="pricing-card popular">
+        <div class="pricing-tag">Most Popular</div>
+        <div class="pricing-name">MockupPro Premium</div>
+        <div class="pricing-price">$4.99<span>/ monthly</span></div>
+        <p class="pricing-desc">Unlock advanced bezels, professional spec outputs, and high-fidelity markup tools.</p>
+        <ul class="pricing-list">
+          <li class="pricing-item checked">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            Remove All Branding Watermarks
+          </li>
+          <li class="pricing-item checked">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            Full MacBook Pro & Safari Web Bezels
+          </li>
+          <li class="pricing-item checked">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            Vector Arrows & Magnifier Spotlight
+          </li>
+          <li class="pricing-item checked">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            Before/After Dual Comparison Slider
+          </li>
+          <li class="pricing-item checked">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            Multi-page PDF & CSV Coordinate Exports
+          </li>
+          <li class="pricing-item checked">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            24/7 Priority Ticket Support
+          </li>
+        </ul>
+        <a href="https://apps.apple.com" class="pricing-btn">Unlock Premium Pro</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ Section -->
+  <section class="faq-section" id="faq">
+    <div class="section-header">
+      <div class="section-subtitle">FAQ</div>
+      <h2 class="section-title-large">Frequently Asked Questions</h2>
+    </div>
+
+    <div class="faq-list">
+      <!-- Item 1 -->
+      <div class="faq-item">
+        <button class="faq-header" onclick="toggleFaq(this)">
+          How do I import screenshots into MockupPro?
+          <svg class="faq-icon-arrow" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </button>
+        <div class="faq-content">
+          <p>You can import images directly from your iOS photo library, camera roll, or choose documents from your iCloud files. The app supports standard PNG, JPG, and HEIC image types.</p>
+        </div>
+      </div>
+
+      <!-- Item 2 -->
+      <div class="faq-item">
+        <button class="faq-header" onclick="toggleFaq(this)">
+          What devices and screen ratios are supported?
+          <svg class="faq-icon-arrow" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </button>
+        <div class="faq-content">
+          <p>We support iPhone 16 Pro, iPad Pro, MacBook Pro, and standard Safari Browser window mockups. Canvas export aspect ratios can be adjusted to fit App Store specifications, Instagram feeds, or LinkedIn posts with single-tap controls.</p>
+        </div>
+      </div>
+
+      <!-- Item 3 -->
+      <div class="faq-item">
+        <button class="faq-header" onclick="toggleFaq(this)">
+          Can I customize the drop shadow and 3D tilts?
+          <svg class="faq-icon-arrow" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </button>
+        <div class="faq-content">
+          <p>Yes. The app provides adjustments for X and Y axis angles (3D perspective tilt), background padding padding parameters, corner rounded radiuses, and shadow blur coefficients.</p>
+        </div>
+      </div>
+
+      <!-- Item 4 -->
+      <div class="faq-item">
+        <button class="faq-header" onclick="toggleFaq(this)">
+          How does the Before/After comparison tool work?
+          <svg class="faq-icon-arrow" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </button>
+        <div class="faq-content">
+          <p>The comparison feature lets you load two images side-by-side or overlapping. You can then adjust a divider position or choose separate alignment presets to compare layout modifications or color themes cleanly.</p>
+        </div>
+      </div>
+
+      <!-- Item 5 -->
+      <div class="faq-item">
+        <button class="faq-header" onclick="toggleFaq(this)">
+          What features are unlocked with MockupPro Premium?
+          <svg class="faq-icon-arrow" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </button>
+        <div class="faq-content">
+          <p>Premium plans remove watermarks on exported files, unlock Safari and MacBook bezels, enable magnifying highlight spotlight lenses, before/after draggable slider dividers, and vector connecting arrows, alongside CSV logs/PDF export formats.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer Navigation Links -->
   <footer>
-    <div class="footer-links">
-      <a href="privacy.html">Privacy Policy</a>
-      <a href="terms.html">Terms of Service</a>
-      <a href="support.html">Contact Support Center</a>
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="logo-container">
+          <div class="logo-icon">M</div>
+          <div class="logo-text">MockupPro</div>
+        </div>
+        <p class="footer-tagline">
+          Create pixel-perfect App Store screen assets, pitch decks, and mockups in seconds right from your mobile device.
+        </p>
+      </div>
+
+      <div>
+        <div class="footer-column-title">Legal Documents</div>
+        <div class="footer-column-links">
+          <a href="privacy.html">Privacy Policy</a>
+          <a href="terms.html">Terms of Service</a>
+        </div>
+      </div>
+
+      <div>
+        <div class="footer-column-title">Connect</div>
+        <div class="footer-column-links">
+          <a href="support.html">Contact Customer Support</a>
+          <a href="https://github.com/senthilmkm/MockupBuilder">GitHub Project</a>
+        </div>
+      </div>
     </div>
-    <div class="copyright">&copy; 2026 MockupPro. All Rights Reserved. All App Store brands are trademarks of Apple Inc.</div>
+
+    <div class="footer-bottom">
+      <div class="copyright">&copy; 2026 MockupPro Studio. All Rights Reserved.</div>
+      <div>All App Store brands and device illustrations are registered trademarks of Apple Inc.</div>
+    </div>
   </footer>
+
+  <!-- Script for Interactive Playground Components -->
+  <script>
+    // Tab switching engine
+    function switchDemoTab(evt, tabId) {
+      // Remove active classes
+      const tabs = document.getElementsByClassName("demo-tab-btn");
+      for (let i = 0; i < tabs.length; i++) {
+        tabs[i].classList.remove("active");
+      }
+      const panels = document.getElementsByClassName("demo-content-panel");
+      for (let i = 0; i < panels.length; i++) {
+        panels[i].classList.remove("active");
+      }
+
+      // Add active classes
+      evt.currentTarget.classList.add("active");
+      document.getElementById(tabId).classList.add("active");
+    }
+
+    // Bezel switcher engine
+    function changeLiveBezel(deviceType) {
+      const container = document.getElementById("liveDeviceContainer");
+      
+      // Remove active selector classes
+      const buttons = document.querySelectorAll(".switch-selector");
+      buttons.forEach(btn => btn.classList.remove("active"));
+      
+      // Add active selector class
+      event.currentTarget.classList.add("active");
+
+      // Inject chosen HTML mockup
+      if (deviceType === 'iphone') {
+        container.innerHTML = `
+          <div class="css-iphone switchable-device">
+            <div class="dynamic-island"></div>
+            <div class="screen-content" style="background: linear-gradient(135deg, #10b981, #06b6d4);">
+              <div style="font-size: 28px; margin-bottom: 8px;">📊</div>
+              <div style="font-weight: 700; font-size: 14px;">Mobile CRM</div>
+            </div>
+          </div>
+        `;
+      } else if (deviceType === 'macbook') {
+        container.innerHTML = `
+          <div class="css-macbook switchable-device">
+            <div class="macbook-screen">
+              <div class="macbook-screen-content" style="background: linear-gradient(135deg, #3b82f6, #8b5cf6);">
+                💻 Enterprise Dashboard
+              </div>
+            </div>
+            <div class="macbook-base"></div>
+          </div>
+        `;
+      } else if (deviceType === 'safari') {
+        container.innerHTML = `
+          <div class="css-safari switchable-device">
+            <div class="safari-header">
+              <div class="safari-dots">
+                <div class="safari-dot" style="background: #ef4444;"></div>
+                <div class="safari-dot" style="background: #f59e0b;"></div>
+                <div class="safari-dot" style="background: #10b981;"></div>
+              </div>
+              <div class="safari-address">https://mysite.com</div>
+            </div>
+            <div class="safari-content" style="background: linear-gradient(135deg, #f43f5e, #e11d48);">
+              🌐 Web App Viewport
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    // Draggable before/after slider engine
+    function handleSliderDrag(val) {
+      const sliderAfterLayer = document.getElementById("sliderAfterLayer");
+      const sliderDragLine = document.getElementById("sliderDragLine");
+      const sliderDragHandle = document.getElementById("sliderDragHandle");
+
+      sliderAfterLayer.style.width = val + "%";
+      sliderDragLine.style.left = val + "%";
+      sliderDragHandle.style.left = val + "%";
+    }
+
+    // Spotlight Magnifier Mouse Move Engine
+    function handleMagnifyMove(e) {
+      const box = document.getElementById("magnifyBox");
+      const glass = document.getElementById("magnifyGlass");
+      const text = document.getElementById("magnifyText");
+      
+      const rect = box.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      
+      // Position magnifier lens
+      glass.style.left = (x - 40) + "px";
+      glass.style.top = (y - 40) + "px";
+      
+      // Simulate magnification zoom by showing text and scale
+      glass.style.transform = "scale(1.2)";
+      text.style.top = "20px";
+    }
+
+    // Reset magnifier lens zoom when mouse leaves
+    function handleMagnifyLeave() {
+      const glass = document.getElementById("magnifyGlass");
+      const text = document.getElementById("magnifyText");
+      
+      glass.style.transform = "scale(1)";
+      text.style.top = "-30px";
+    }
+
+    // Toggle FAQ Collapsible
+    function toggleFaq(btn) {
+      const item = btn.parentNode;
+      const isActive = item.classList.contains("active");
+      
+      // Close all items
+      const allItems = document.querySelectorAll(".faq-item");
+      allItems.forEach(i => {
+        i.classList.remove("active");
+        i.querySelector(".faq-content").style.maxHeight = "0px";
+      });
+
+      // Open selected item
+      if (!isActive) {
+        item.classList.add("active");
+        const content = item.querySelector(".faq-content");
+        content.style.maxHeight = content.scrollHeight + "px";
+      }
+    }
+  </script>
 </body>
 </html>
