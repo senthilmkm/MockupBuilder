@@ -61,6 +61,10 @@ export default function HelpScreen() {
 
   const faqItems: FaqItem[] = [
     {
+      question: 'Does MockupBuilder support screenshots from all iPhone models?',
+      answer: 'Yes! MockupBuilder automatically scales, centers, and fits screenshots from any iPhone screen size or aspect ratio (including standard, SE, mini, and Pro Max models) to fill the chosen bezel. You can also adjust screenshot zoom and horizontal/vertical offsets under the "Adjust" menu for a customized layout.',
+    },
+    {
       question: 'Where do my saved mockups go?',
       answer: 'By default, MockupBuilder saves screenshots to your local Photos app. You can easily switch this to save directly to your device\'s Files app by modifying the "Default Export Save" preference in the Settings screen.',
     },
