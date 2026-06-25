@@ -35,6 +35,12 @@ export default function TermsScreen() {
       <Text style={styles.bodyText}>
         MockupBuilder is provided "as is" without warranty of any kind. In no event shall the developer be liable for any direct or indirect damages resulting from the use or inability to use this app.
       </Text>
+
+      <Text style={styles.sectionTitle}>5. End User License Agreement (EULA)</Text>
+      <Text style={styles.bodyText}>
+        Your download and use of MockupBuilder is also subject to Apple's Standard Licensed Application End User License Agreement (EULA). You can view the EULA terms at: {"\n"}
+        https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
+      </Text>
     </ScrollView>
   );
 }

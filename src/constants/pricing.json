@@ -2,7 +2,7 @@
   "paywall": {
     "title": "Unlock MockupBuilder Pro",
     "subtitle": "Supercharge your screenshot layouts & stand out in feeds",
-    "billingDisclosure": "Billing is handled securely via Apple StoreKit. Subscriptions automatically renew unless disabled in iTunes Account Settings at least 24 hours prior to billing dates."
+    "billingDisclosure": "Billing is handled securely via Apple StoreKit. Subscriptions automatically renew unless disabled in iTunes Account Settings at least 24 hours prior to billing dates. Subject to Apple's Standard EULA."
   },
   "appBanner": {
     "enabled": true,
