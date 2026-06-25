@@ -69,11 +69,12 @@ export default function SettingsScreen() {
   };
 
   return (
-    <ScrollView 
-      style={styles.container}
-      contentContainerStyle={[styles.content, { paddingTop: insets.top + 20, paddingBottom: insets.bottom + 40 }]}
-    >
-      <Text style={styles.title}>Settings</Text>
+    <View style={[styles.container, { paddingTop: insets.top }]}>
+      <ScrollView 
+        style={styles.container}
+        contentContainerStyle={[styles.content, { paddingTop: 20, paddingBottom: insets.bottom + 40 }]}
+      >
+        <Text style={styles.title}>Settings</Text>
       
       {/* 1. Subscription Status */}
       {pricing.appBanner.enabled && (
@@ -209,6 +210,7 @@ export default function SettingsScreen() {
         MockupBuilder v1.0.0 (Expo SDK 56)
       </Text>
     </ScrollView>
+    </View>
   );
 }
 

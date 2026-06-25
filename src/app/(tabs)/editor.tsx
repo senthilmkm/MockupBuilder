@@ -16,6 +16,7 @@ export default function EditorScreen() {
   const insets = useSafeAreaInsets();
   const canvasRef = useRef<View>(null);
   const [canvasWidth, setCanvasWidth] = useState(0);
+  const [wrapperHeight, setWrapperHeight] = useState(0);
   const [activeMenu, setActiveMenu] = useState<'ratio' | 'frame' | 'gradient' | 'adjust' | 'annotate' | 'export'>('ratio');
   const [isWatermarkEnabled, setIsWatermarkEnabled] = useState(true);
   const [activeRatioIndex, setActiveRatioIndex] = useState(0);
@@ -81,8 +82,9 @@ export default function EditorScreen() {
   } = useCanvasStore();
 
   const handleCanvasLayout = (e: any) => {
-    const { width } = e.nativeEvent.layout;
+    const { width, height } = e.nativeEvent.layout;
     setCanvasWidth(width);
+    setWrapperHeight(height);
   };
 
   const handleExportPNG = async (share: boolean) => {
@@ -691,27 +693,40 @@ export default function EditorScreen() {
     }
   };
 
-  const getCanvasHeight = (): number => {
+  const getAspectRatioValue = (): number => {
     switch (aspectRatio) {
-      case '16:9':
-        return (canvasWidth * 9) / 16;
-      case '9:16':
-        return (canvasWidth * 16) / 9;
-      case '1:1':
-        return canvasWidth;
-      case '4:5':
-        return (canvasWidth * 5) / 4;
-      case '4:3':
-        return (canvasWidth * 3) / 4;
-      case '3:4':
-        return (canvasWidth * 4) / 3;
-      case 'AppStore':
-        return canvasWidth * 1.5;
-      case 'iPadStore':
-        return (canvasWidth * 4) / 3;
-      default:
-        return canvasWidth;
+      case '16:9': return 16 / 9;
+      case '9:16': return 9 / 16;
+      case '1:1': return 1;
+      case '4:5': return 4 / 5;
+      case '4:3': return 4 / 3;
+      case '3:4': return 3 / 4;
+      case 'AppStore': return 1290 / 2796;
+      case 'iPadStore': return 3 / 4;
+      default: return 1;
     }
+  };
+
+  const getWorkspaceDimensions = () => {
+    const ratio = getAspectRatioValue();
+    if (!canvasWidth || !wrapperHeight) {
+      const defaultWidth = canvasWidth || 300;
+      return { width: defaultWidth, height: defaultWidth / ratio };
+    }
+    
+    // Max width and height with safety padding
+    const maxW = canvasWidth - 24;
+    const maxH = wrapperHeight - 24;
+    
+    let w = maxW;
+    let h = maxW / ratio;
+    
+    if (h > maxH) {
+      h = maxH;
+      w = maxH * ratio;
+    }
+    
+    return { width: w, height: h };
   };
 
   const handleUndo = () => {
@@ -723,6 +738,8 @@ export default function EditorScreen() {
     haptics.lightImpact();
     redo();
   };
+
+  const { width: displayWidth, height: displayHeight } = getWorkspaceDimensions();
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
@@ -751,10 +768,22 @@ export default function EditorScreen() {
 
       {/* Dynamic Canvas Workspace viewport */}
       <View style={styles.canvasWrapper} onLayout={handleCanvasLayout}>
-        <View ref={canvasRef} collapsable={false} style={{ width: '100%', height: getCanvasHeight(), position: 'relative' }}>
-          <CanvasView width={canvasWidth} isWatermarkVisible={!isPro || isWatermarkEnabled} />
-          <AnnotationLayer canvasWidth={canvasWidth} canvasHeight={getCanvasHeight()} />
-        </View>
+        {displayWidth > 0 && displayHeight > 0 && (
+          <View 
+            ref={canvasRef} 
+            collapsable={false} 
+            style={{ 
+              width: displayWidth, 
+              height: displayHeight, 
+              position: 'relative',
+              justifyContent: 'center',
+              alignItems: 'center'
+            }}
+          >
+            <CanvasView width={displayWidth} isWatermarkVisible={!isPro || isWatermarkEnabled} />
+            <AnnotationLayer canvasWidth={displayWidth} canvasHeight={displayHeight} />
+          </View>
+        )}
 
         {/* Sandbox Direct Actions Overlay (Visible only when no screenshot is imported) */}
         {!imageUri && (
