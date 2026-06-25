@@ -754,30 +754,30 @@ export default function EditorScreen() {
         <View ref={canvasRef} collapsable={false} style={{ width: '100%', height: getCanvasHeight(), position: 'relative' }}>
           <CanvasView width={canvasWidth} isWatermarkVisible={!isPro || isWatermarkEnabled} />
           <AnnotationLayer canvasWidth={canvasWidth} canvasHeight={getCanvasHeight()} />
-
-          {/* Sandbox Direct Actions Overlay (Visible only when no screenshot is imported) */}
-          {!imageUri && (
-            <View style={styles.sandboxOverlay}>
-              <View style={styles.sandboxContainer}>
-                <TouchableOpacity 
-                  style={styles.sandboxBtn}
-                  onPress={pickSingleScreenshot}
-                >
-                  <Text style={styles.sandboxBtnText}>📷 Import Screenshot</Text>
-                </TouchableOpacity>
-                <TouchableOpacity 
-                  style={[styles.sandboxBtn, styles.sandboxSplitBtn]}
-                  onPress={pickSplitScreenshots}
-                >
-                  <Text style={styles.sandboxBtnText}>↔️ Before & After</Text>
-                </TouchableOpacity>
-              </View>
-              <Text style={styles.sandboxHint}>
-                Sandbox Mode: Try presets or overlays and tap above to insert your screen
-              </Text>
-            </View>
-          )}
         </View>
+
+        {/* Sandbox Direct Actions Overlay (Visible only when no screenshot is imported) */}
+        {!imageUri && (
+          <View style={styles.sandboxOverlay}>
+            <View style={styles.sandboxContainer}>
+              <TouchableOpacity 
+                style={styles.sandboxBtn}
+                onPress={pickSingleScreenshot}
+              >
+                <Text style={styles.sandboxBtnText}>📷 Import Screenshot</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={[styles.sandboxBtn, styles.sandboxSplitBtn]}
+                onPress={pickSplitScreenshots}
+              >
+                <Text style={styles.sandboxBtnText}>↔️ Before & After</Text>
+              </TouchableOpacity>
+            </View>
+            <Text style={styles.sandboxHint}>
+              Sandbox Mode: Try presets or overlays and tap above to insert your screen
+            </Text>
+          </View>
+        )}
       </View>
 
       {/* Editor Sub-Menu selection options */}
@@ -868,6 +868,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 16,
+    position: 'relative',
   },
   emptyState: {
     padding: 32,
