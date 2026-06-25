@@ -18,6 +18,7 @@ export default function EditorScreen() {
   const [activeMenu, setActiveMenu] = useState<'ratio' | 'frame' | 'gradient' | 'adjust' | 'annotate' | 'export'>('ratio');
   const [isWatermarkEnabled, setIsWatermarkEnabled] = useState(true);
   const [activeRatioIndex, setActiveRatioIndex] = useState(0);
+  const [sliderWidths, setSliderWidths] = useState<Record<string, number>>({});
 
   const handleRatioScroll = (event: any) => {
     const scrollOffset = event.nativeEvent.contentOffset.x;
@@ -221,78 +222,79 @@ export default function EditorScreen() {
 
   const pickSplitScreenshots = async () => {
     haptics.lightImpact();
-    
-    // Pick Before Image
-    Alert.alert('Step 1 of 2', 'Choose the "Before" (Old design) screenshot first.', [
-      {
-        text: 'Select Image',
-        onPress: async () => {
-          const beforeResult = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ['images'],
-            allowsEditing: false,
-            quality: 1,
-          });
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsMultipleSelection: true,
+      selectionLimit: 2,
+      quality: 1,
+    });
 
-          if (!beforeResult.canceled && beforeResult.assets[0].uri) {
-            const beforeUri = beforeResult.assets[0].uri;
-            haptics.lightImpact();
-
-            // Pick After Image
-            Alert.alert('Step 2 of 2', 'Now select the "After" (New design) screenshot.', [
-              {
-                text: 'Select Image',
-                onPress: async () => {
-                  const afterResult = await ImagePicker.launchImageLibraryAsync({
-                    mediaTypes: ['images'],
-                    allowsEditing: false,
-                    quality: 1,
-                  });
-
-                  if (!afterResult.canceled && afterResult.assets[0].uri) {
-                    setBeforeImageUri(beforeUri);
-                    setImageUri(afterResult.assets[0].uri);
-                    setIsSplitSliderEnabled(true);
-                    haptics.success();
-                  }
-                }
-              }
-            ]);
-          }
-        }
-      },
-      { text: 'Cancel', style: 'cancel' }
-    ]);
+    if (!result.canceled) {
+      if (result.assets.length >= 2) {
+        setBeforeImageUri(result.assets[0].uri);
+        setImageUri(result.assets[1].uri);
+        setIsSplitSliderEnabled(true);
+        haptics.success();
+      } else {
+        haptics.error();
+        Alert.alert(
+          'Selection Required',
+          'Please select exactly 2 screenshots (Before and After) for the comparison slider.',
+          [
+            { text: 'Try Again', onPress: () => pickSplitScreenshots() },
+            { text: 'Cancel', style: 'cancel' }
+          ]
+        );
+      }
+    }
   };
 
   // Helper mock for Slider slider (as Slider package may require installing)
   // Instead of imported slider which can be fragile, we render clean custom button controls
   // or a simple custom slider view that increment-adjusts values. This is extremely robust!
-  const renderValueStepper = (label: string, value: number, min: number, max: number, step: number, onChange: (val: number) => void) => {
+  const renderValueSlider = (
+    label: string,
+    value: number,
+    min: number,
+    max: number,
+    onChange: (val: number) => void,
+    displayFormatter?: (v: number) => string
+  ) => {
+    const sliderKey = label;
+    const width = sliderWidths[sliderKey] || 0;
+    const percent = Math.min(Math.max(0, ((value - min) / (max - min)) * 100), 100);
+
+    const handleTouch = (evt: any) => {
+      if (width === 0) return;
+      const x = evt.nativeEvent.locationX;
+      const percentage = Math.min(Math.max(0, x / width), 1);
+      const newValue = min + percentage * (max - min);
+      onChange(newValue);
+    };
+
     return (
-      <View style={styles.stepperContainer}>
-        <Text style={styles.stepperLabel}>{label}: {value.toFixed(0)}</Text>
-        <View style={styles.stepperRow}>
-          <TouchableOpacity 
-            style={styles.stepperBtn} 
-            onPress={() => {
-              haptics.lightImpact();
-              onChange(Math.max(min, value - step));
-            }}
-          >
-            <Text style={styles.stepperBtnText}>-</Text>
-          </TouchableOpacity>
-          <View style={styles.stepperValueTrack}>
-            <View style={[styles.stepperValueFill, { width: `${((value - min) / (max - min)) * 100}%` }]} />
+      <View style={styles.sliderContainer}>
+        <View style={styles.sliderHeader}>
+          <Text style={styles.sliderLabel}>{label}</Text>
+          <Text style={styles.sliderValue}>
+            {displayFormatter ? displayFormatter(value) : value.toFixed(0)}
+          </Text>
+        </View>
+        <View 
+          style={styles.sliderTrackContainer}
+          onLayout={(e) => {
+            const layoutWidth = e.nativeEvent.layout.width;
+            setSliderWidths((prev) => ({ ...prev, [sliderKey]: layoutWidth }));
+          }}
+          onStartShouldSetResponder={() => true}
+          onMoveShouldSetResponder={() => true}
+          onResponderGrant={handleTouch}
+          onResponderMove={handleTouch}
+        >
+          <View style={styles.sliderTrackBg} pointerEvents="none">
+            <View style={[styles.sliderTrackFill, { width: `${percent}%` }]} />
           </View>
-          <TouchableOpacity 
-            style={styles.stepperBtn}
-            onPress={() => {
-              haptics.lightImpact();
-              onChange(Math.min(max, value + step));
-            }}
-          >
-            <Text style={styles.stepperBtnText}>+</Text>
-          </TouchableOpacity>
+          <View style={[styles.sliderHandle, { left: `${percent}%` }]} pointerEvents="none" />
         </View>
       </View>
     );
@@ -399,23 +401,23 @@ export default function EditorScreen() {
         return (
           <ScrollView contentContainerStyle={styles.adjustScrollContent} showsVerticalScrollIndicator={false}>
             <Text style={styles.adjustSectionHeader}>Canvas & Tilt</Text>
-            {renderValueStepper('Padding', padding, 5, 30, 2, setPadding)}
-            {renderValueStepper('3D Tilt Rotation', rotation3D, -30, 30, 5, setRotation3D)}
-            {renderValueStepper('Drop Shadow', shadowIntensity * 100, 0, 100, 10, (v) => setShadowIntensity(v / 100))}
+            {renderValueSlider('Padding', padding, 5, 30, setPadding)}
+            {renderValueSlider('3D Tilt Rotation', rotation3D, -30, 30, setRotation3D, (v) => `${v.toFixed(0)}°`)}
+            {renderValueSlider('Drop Shadow', shadowIntensity, 0, 1, setShadowIntensity, (v) => `${(v * 100).toFixed(0)}%`)}
             
             <Text style={[styles.adjustSectionHeader, { marginTop: 16 }]}>
               {isSplitSliderEnabled ? 'Bezel Image (After) Alignment' : 'Bezel Image Alignment'}
             </Text>
-            {renderValueStepper('Screenshot Zoom', screenshotScale * 100, 50, 250, 10, (v) => setScreenshotScale(v / 100))}
-            {renderValueStepper('Offset X (Horizontal)', screenshotOffsetX, -150, 150, 10, setScreenshotOffsetX)}
-            {renderValueStepper('Offset Y (Vertical)', screenshotOffsetY, -150, 150, 10, setScreenshotOffsetY)}
+            {renderValueSlider('Screenshot Zoom', screenshotScale, 0.5, 2.5, setScreenshotScale, (v) => `${(v * 100).toFixed(0)}%`)}
+            {renderValueSlider('Offset X (Horizontal)', screenshotOffsetX, -150, 150, setScreenshotOffsetX, (v) => `${v.toFixed(0)}px`)}
+            {renderValueSlider('Offset Y (Vertical)', screenshotOffsetY, -150, 150, setScreenshotOffsetY, (v) => `${v.toFixed(0)}px`)}
 
             {isSplitSliderEnabled && (
               <>
                 <Text style={[styles.adjustSectionHeader, { marginTop: 16 }]}>Bezel Image (Before) Alignment</Text>
-                {renderValueStepper('Before Zoom', beforeScreenshotScale * 100, 50, 250, 10, (v) => setBeforeScreenshotScale(v / 100))}
-                {renderValueStepper('Before Offset X', beforeScreenshotOffsetX, -150, 150, 10, setBeforeScreenshotOffsetX)}
-                {renderValueStepper('Before Offset Y', beforeScreenshotOffsetY, -150, 150, 10, setBeforeScreenshotOffsetY)}
+                {renderValueSlider('Before Zoom', beforeScreenshotScale, 0.5, 2.5, setBeforeScreenshotScale, (v) => `${(v * 100).toFixed(0)}%`)}
+                {renderValueSlider('Before Offset X', beforeScreenshotOffsetX, -150, 150, setBeforeScreenshotOffsetX, (v) => `${v.toFixed(0)}px`)}
+                {renderValueSlider('Before Offset Y', beforeScreenshotOffsetY, -150, 150, setBeforeScreenshotOffsetY, (v) => `${v.toFixed(0)}px`)}
               </>
             )}
           </ScrollView>
@@ -536,7 +538,7 @@ export default function EditorScreen() {
     <View style={[styles.container, { paddingTop: insets.top }]}>
       {/* Editor Header Bar */}
       <View style={styles.editorHeader}>
-        <Text style={styles.editorHeaderTitle}>Mockup Builder</Text>
+        <Text style={styles.editorHeaderTitle}>MockupBuilder</Text>
         <View style={styles.historyControls}>
           <TouchableOpacity 
             style={[styles.historyBtn, undoStack.length === 0 && styles.historyBtnDisabled]} 
@@ -824,46 +826,54 @@ const styles = StyleSheet.create({
   adjustWrapper: {
     gap: 12,
   },
-  stepperContainer: {
+  // Slider Upgrade Styles
+  sliderContainer: {
+    marginBottom: 14,
     width: '100%',
   },
-  stepperLabel: {
+  sliderHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  sliderLabel: {
     color: '#94A3B8',
     fontSize: 11,
     fontWeight: 'bold',
-    marginBottom: 4,
     textTransform: 'uppercase',
   },
-  stepperRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  stepperBtn: {
-    width: 32,
-    height: 32,
-    borderRadius: 6,
-    backgroundColor: '#0F172A',
-    borderColor: '#334155',
-    borderWidth: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  stepperBtnText: {
-    color: '#F8FAFC',
-    fontSize: 16,
+  sliderValue: {
+    color: '#38BDF8',
+    fontSize: 12,
     fontWeight: 'bold',
   },
-  stepperValueTrack: {
-    flex: 1,
+  sliderTrackContainer: {
+    height: 20,
+    justifyContent: 'center',
+    position: 'relative',
+    width: '100%',
+  },
+  sliderTrackBg: {
     height: 6,
     backgroundColor: '#0F172A',
     borderRadius: 3,
     overflow: 'hidden',
+    width: '100%',
   },
-  stepperValueFill: {
+  sliderTrackFill: {
     height: '100%',
     backgroundColor: '#38BDF8',
+  },
+  sliderHandle: {
+    position: 'absolute',
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: '#ffffff',
+    borderColor: '#38BDF8',
+    borderWidth: 1.5,
+    marginLeft: -8, // center handle
   },
   // Gradient selection
   gradientScroll: {

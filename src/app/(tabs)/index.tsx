@@ -7,6 +7,7 @@ import { useCanvasStore } from '@/store/canvasStore';
 import { useAlertsStore } from '@/store/alertsStore';
 import { haptics } from '@/services/haptics';
 import { LinearGradient } from 'expo-linear-gradient';
+import Svg, { Rect, Circle } from 'react-native-svg';
 
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
@@ -54,48 +55,32 @@ export default function HomeScreen() {
 
   const pickSplitScreenshots = async () => {
     haptics.lightImpact();
-    
-    // Pick Before Image
-    Alert.alert('Step 1 of 2', 'Choose the "Before" (Old design) screenshot first.', [
-      {
-        text: 'Select Image',
-        onPress: async () => {
-          const beforeResult = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ['images'],
-            allowsEditing: false,
-            quality: 1,
-          });
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsMultipleSelection: true,
+      selectionLimit: 2,
+      quality: 1,
+    });
 
-          if (!beforeResult.canceled && beforeResult.assets[0].uri) {
-            const beforeUri = beforeResult.assets[0].uri;
-            haptics.lightImpact();
-
-            // Pick After Image
-            Alert.alert('Step 2 of 2', 'Now select the "After" (New design) screenshot.', [
-              {
-                text: 'Select Image',
-                onPress: async () => {
-                  const afterResult = await ImagePicker.launchImageLibraryAsync({
-                    mediaTypes: ['images'],
-                    allowsEditing: false,
-                    quality: 1,
-                  });
-
-                  if (!afterResult.canceled && afterResult.assets[0].uri) {
-                    setBeforeImageUri(beforeUri);
-                    setImageUri(afterResult.assets[0].uri);
-                    setIsSplitSliderEnabled(true);
-                    haptics.success();
-                    router.push('/editor');
-                  }
-                }
-              }
-            ]);
-          }
-        }
-      },
-      { text: 'Cancel', style: 'cancel' }
-    ]);
+    if (!result.canceled) {
+      if (result.assets.length >= 2) {
+        setBeforeImageUri(result.assets[0].uri);
+        setImageUri(result.assets[1].uri);
+        setIsSplitSliderEnabled(true);
+        haptics.success();
+        router.push('/editor');
+      } else {
+        haptics.error();
+        Alert.alert(
+          'Selection Required',
+          'Please select exactly 2 screenshots (Before and After) for the comparison slider.',
+          [
+            { text: 'Try Again', onPress: () => pickSplitScreenshots() },
+            { text: 'Cancel', style: 'cancel' }
+          ]
+        );
+      }
+    }
   };
 
   return (
@@ -177,7 +162,16 @@ export default function HomeScreen() {
                 router.push('/editor');
               }}
             >
-              <View style={[styles.presetPreview, { backgroundColor: '#FF4B2B' }]} />
+              <View style={styles.presetPreview}>
+                <Svg width={120} height={70} viewBox="0 0 120 70">
+                  <Rect width={120} height={70} rx={8} fill="#FF4B2B" opacity={0.12} />
+                  <Rect x={15} y={15} width={90} height={40} rx={4} stroke="#FF4B2B" strokeWidth={1.5} fill="none" />
+                  <Circle cx={22} cy={20} r={2} fill="#FF4B2B" />
+                  <Circle cx={27} cy={20} r={2} fill="#FF4B2B" />
+                  <Circle cx={32} cy={20} r={2} fill="#FF4B2B" />
+                  <Rect x={38} y={17} width={61} height={6} rx={2} fill="#FF4B2B" opacity={0.3} />
+                </Svg>
+              </View>
               <Text style={styles.presetLabel}>X Landscape</Text>
             </TouchableOpacity>
 
@@ -192,7 +186,14 @@ export default function HomeScreen() {
                 router.push('/editor');
               }}
             >
-              <View style={[styles.presetPreview, { backgroundColor: '#F09819' }]} />
+              <View style={styles.presetPreview}>
+                <Svg width={120} height={70} viewBox="0 0 120 70">
+                  <Rect width={120} height={70} rx={8} fill="#F09819" opacity={0.12} />
+                  <Rect x={48} y={10} width={24} height={50} rx={5} stroke="#F09819" strokeWidth={1.5} fill="none" />
+                  <Rect x={55} y={14} width={10} height={3} rx={1.5} fill="#F09819" />
+                  <Rect x={57} y={56} width={6} height={1.5} rx={0.75} fill="#F09819" opacity={0.5} />
+                </Svg>
+              </View>
               <Text style={styles.presetLabel}>Vertical Story</Text>
             </TouchableOpacity>
 
@@ -207,7 +208,13 @@ export default function HomeScreen() {
                 router.push('/editor');
               }}
             >
-              <View style={[styles.presetPreview, { backgroundColor: '#8E2DE2' }]} />
+              <View style={styles.presetPreview}>
+                <Svg width={120} height={70} viewBox="0 0 120 70">
+                  <Rect width={120} height={70} rx={8} fill="#8E2DE2" opacity={0.12} />
+                  <Rect x={40} y={15} width={40} height={40} rx={4} stroke="#8E2DE2" strokeWidth={1.5} fill="none" />
+                  <Rect x={46} y={21} width={28} height={28} rx={2} fill="#8E2DE2" opacity={0.2} />
+                </Svg>
+              </View>
               <Text style={styles.presetLabel}>LinkedIn Square</Text>
             </TouchableOpacity>
 
@@ -222,7 +229,15 @@ export default function HomeScreen() {
                 router.push('/editor');
               }}
             >
-              <View style={[styles.presetPreview, { backgroundColor: '#11998E' }]} />
+              <View style={styles.presetPreview}>
+                <Svg width={120} height={70} viewBox="0 0 120 70">
+                  <Rect width={120} height={70} rx={8} fill="#11998E" opacity={0.12} />
+                  <Rect x={43} y={12} width={34} height={46} rx={4} stroke="#11998E" strokeWidth={1.5} fill="none" />
+                  <Rect x={48} y={17} width={24} height={22} rx={2} fill="#11998E" opacity={0.2} />
+                  <Rect x={48} y={43} width={24} height={4} rx={1} fill="#11998E" opacity={0.3} />
+                  <Rect x={48} y={50} width={16} height={3} rx={1} fill="#11998E" opacity={0.3} />
+                </Svg>
+              </View>
               <Text style={styles.presetLabel}>Portrait Feed</Text>
             </TouchableOpacity>
 
@@ -237,7 +252,13 @@ export default function HomeScreen() {
                 router.push('/editor');
               }}
             >
-              <View style={[styles.presetPreview, { backgroundColor: '#00CDAC' }]} />
+              <View style={styles.presetPreview}>
+                <Svg width={120} height={70} viewBox="0 0 120 70">
+                  <Rect width={120} height={70} rx={8} fill="#00CDAC" opacity={0.12} />
+                  <Rect x={46} y={10} width={28} height={50} rx={4} stroke="#00CDAC" strokeWidth={1.5} fill="none" />
+                  <Rect x={50} y={15} width={20} height={35} rx={3} stroke="#00CDAC" strokeWidth={1} fill="none" opacity={0.6} />
+                </Svg>
+              </View>
               <Text style={styles.presetLabel}>Product Hunt Gallery</Text>
             </TouchableOpacity>
 
@@ -252,7 +273,13 @@ export default function HomeScreen() {
                 router.push('/editor');
               }}
             >
-              <View style={[styles.presetPreview, { backgroundColor: '#3A7BD5' }]} />
+              <View style={styles.presetPreview}>
+                <Svg width={120} height={70} viewBox="0 0 120 70">
+                  <Rect width={120} height={70} rx={8} fill="#3A7BD5" opacity={0.12} />
+                  <Rect x={38} y={12} width={44} height={46} rx={5} stroke="#3A7BD5" strokeWidth={1.5} fill="none" />
+                  <Rect x={42} y={16} width={36} height={38} rx={2} stroke="#3A7BD5" strokeWidth={1} fill="none" opacity={0.6} />
+                </Svg>
+              </View>
               <Text style={styles.presetLabel}>12.9" iPad Store</Text>
             </TouchableOpacity>
           </ScrollView>
@@ -492,8 +519,7 @@ const styles = StyleSheet.create({
     height: 70,
     borderRadius: 8,
     marginBottom: 6,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
+    overflow: 'hidden',
   },
   presetLabel: {
     color: '#94A3B8',
