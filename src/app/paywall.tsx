@@ -11,32 +11,91 @@ export default function PaywallScreen() {
   const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'annual' | 'lifetime'>('annual');
   const [isPurchasing, setIsPurchasing] = useState(false);
 
-  const handlePurchase = () => {
+  const handlePurchase = async () => {
     haptics.mediumImpact();
     setIsPurchasing(true);
 
-    // Mock StoreKit/RevenueCat checkout completion
-    setTimeout(() => {
+    if (Platform.OS === 'web') {
+      // Mock StoreKit/RevenueCat checkout completion fallback for web browser
+      setTimeout(() => {
+        setIsPurchasing(false);
+        haptics.success();
+        useCanvasStore.getState().setProStatus(true);
+        Alert.alert('Congratulations!', 'You are now a MockupBuilder Pro member!', [
+          { text: 'Awesome', onPress: () => router.back() }
+        ]);
+      }, 1500);
+      return;
+    }
+
+    try {
+      const Purchases = require('react-native-purchases').default;
+      const offerings = await Purchases.getOfferings();
+      if (offerings.current !== null && offerings.current.availablePackages.length > 0) {
+        // Map UI selection to corresponding package type
+        const expectedType = selectedPlan === 'annual' ? 'annual' : 'monthly';
+        const packageToBuy = offerings.current.availablePackages.find(
+          (pkg: any) => pkg.packageType.toLowerCase() === expectedType
+        ) || offerings.current.availablePackages[0];
+
+        const { customerInfo } = await Purchases.purchasePackage(packageToBuy);
+        const isProActive = customerInfo.entitlements.active['pro_access'] !== undefined;
+        useCanvasStore.getState().setProStatus(isProActive);
+
+        if (isProActive) {
+          haptics.success();
+          Alert.alert('Success!', 'Thank you for upgrading to MockupBuilder Pro!', [
+            { text: 'OK', onPress: () => router.back() }
+          ]);
+        } else {
+          Alert.alert('Subscription Incomplete', 'Could not verify entitlement. Please contact support.');
+        }
+      } else {
+        Alert.alert('Store Connection Error', 'No active subscription offerings found.');
+      }
+    } catch (error: any) {
+      if (!error.userCancelled) {
+        Alert.alert('Checkout Failed', error.message || 'An error occurred during payment.');
+      }
+    } finally {
       setIsPurchasing(false);
-      haptics.success();
-      useCanvasStore.getState().setProStatus(true);
-      Alert.alert('Congratulations!', 'You are now a MockupBuilder Pro member!', [
-        { text: 'Awesome', onPress: () => router.back() }
-      ]);
-    }, 1800);
+    }
   };
 
-  const handleRestore = () => {
+  const handleRestore = async () => {
     haptics.lightImpact();
     setIsPurchasing(true);
     
-    // Mock subscription restore verification
-    setTimeout(() => {
+    if (Platform.OS === 'web') {
+      // Mock subscription restore verification fallback for web browser
+      setTimeout(() => {
+        setIsPurchasing(false);
+        haptics.success();
+        useCanvasStore.getState().setProStatus(true);
+        Alert.alert('Restored', 'Your Pro purchases have been successfully restored.');
+      }, 1000);
+      return;
+    }
+
+    try {
+      const Purchases = require('react-native-purchases').default;
+      const customerInfo = await Purchases.restorePurchases();
+      const isProActive = customerInfo.entitlements.active['pro_access'] !== undefined;
+      useCanvasStore.getState().setProStatus(isProActive);
+
+      if (isProActive) {
+        haptics.success();
+        Alert.alert('Restored', 'Your Pro subscription has been successfully restored!', [
+          { text: 'Awesome', onPress: () => router.back() }
+        ]);
+      } else {
+        Alert.alert('No Subscription Found', 'We could not find any active Pro subscriptions to restore.');
+      }
+    } catch (error: any) {
+      Alert.alert('Restore Failed', error.message || 'An error occurred while restoring purchases.');
+    } finally {
       setIsPurchasing(false);
-      haptics.success();
-      useCanvasStore.getState().setProStatus(true);
-      Alert.alert('Restored', 'Your Pro purchases have been successfully restored.');
-    }, 1200);
+    }
   };
 
   return (

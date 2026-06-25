@@ -1,16 +1,35 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from 'expo-router';
-import { useColorScheme } from 'react-native';
+import { useColorScheme, Platform } from 'react-native';
 import { Stack } from 'expo-router';
 import { useEffect } from 'react';
 
 import { AnimatedSplashOverlay } from '@/components/animated-icon';
 import { exportEngine } from '@/services/exportEngine';
+import { useCanvasStore } from '@/store/canvasStore';
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
 
   useEffect(() => {
     exportEngine.evictOldCachedFiles();
+
+    // Initialize RevenueCat and sync Pro status on boot for native platforms
+    if (Platform.OS !== 'web') {
+      const initRevenueCat = async () => {
+        try {
+          const Purchases = require('react-native-purchases').default;
+          // Set up iOS API key
+          Purchases.configure({ apiKey: 'appl_sVbOskwWwZpLREBvWzQxHlPdEyg' });
+          
+          const customerInfo = await Purchases.getCustomerInfo();
+          const isProActive = customerInfo.entitlements.active['pro_access'] !== undefined;
+          useCanvasStore.getState().setProStatus(isProActive);
+        } catch (error) {
+          console.warn('RevenueCat boot initialization warning:', error);
+        }
+      };
+      initRevenueCat();
+    }
   }, []);
 
   return (
