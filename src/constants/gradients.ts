@@ -71,6 +71,30 @@ export const GRADIENTS: GradientPreset[] = [
     name: 'Off-White Grid',
     colors: ['#F5F7FA', '#E4E8F0'],
     textColor: '#60646C',
+  },
+  {
+    id: 'gradient-aurora',
+    name: 'Aurora Borealis',
+    colors: ['#00c6ff', '#0072ff', '#8E2DE2'],
+    textColor: '#ffffff',
+  },
+  {
+    id: 'gradient-coral',
+    name: 'Neon Coral',
+    colors: ['#f857a6', '#ff5858'],
+    textColor: '#ffffff',
+  },
+  {
+    id: 'gradient-lavender',
+    name: 'Soft Lavender',
+    colors: ['#eecda3', '#ef629f'],
+    textColor: '#ffffff',
+  },
+  {
+    id: 'gradient-mystic',
+    name: 'Mystic Glow',
+    colors: ['#7F00FF', '#FF007F'],
+    textColor: '#ffffff',
   }
 ];
 

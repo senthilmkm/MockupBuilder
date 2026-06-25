@@ -28,6 +28,8 @@ export const CanvasView: React.FC<CanvasViewProps> = ({ width, onLayout, childre
     screenshotOffsetX = 0,
     screenshotOffsetY = 0,
     showNotch = true,
+    backgroundType = 'gradient',
+    backgroundImageUri = null,
   } = useCanvasStore();
 
   // Determine height based on aspect ratio
@@ -54,8 +56,19 @@ export const CanvasView: React.FC<CanvasViewProps> = ({ width, onLayout, childre
     }
   };
 
+  const getColors = () => {
+    if (backgroundType === 'color') {
+      return [backgroundColor, backgroundColor] as [string, string, ...string[]];
+    }
+    return getGradientColors(backgroundColor);
+  };
+
   const canvasHeight = getCanvasHeight();
-  const gradientColors = getGradientColors(backgroundColor);
+  const gradientColors = getColors();
+  const gradientColorsList = gradientColors; // For backwards compatibility if any
+  const gradientColorsMap = gradientColors; 
+  const gradientColorsUsed = gradientColors;
+  const finalGradientColors = gradientColors;
 
   const renderScreenContent = () => {
     if (isSplitSliderEnabled) {
@@ -224,12 +237,27 @@ export const CanvasView: React.FC<CanvasViewProps> = ({ width, onLayout, childre
           },
         ]}
       >
-        <LinearGradient
-          colors={gradientColors}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.gradientBackdrop}
+        <View
+          style={[
+            styles.gradientBackdrop,
+            { position: 'relative', overflow: 'hidden', width: '100%', height: '100%' }
+          ]}
         >
+          {backgroundType === 'image' && backgroundImageUri ? (
+            <Image
+              source={{ uri: backgroundImageUri }}
+              style={StyleSheet.absoluteFill}
+              resizeMode="cover"
+            />
+          ) : (
+            <LinearGradient
+              colors={gradientColors}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={StyleSheet.absoluteFill}
+            />
+          )}
+
           {/* Canvas Padding Layout Wrapper */}
           <View style={[styles.paddingWrapper, { padding: `${padding}%` as DimensionValue }]}>
             {renderDeviceFrame()}
@@ -237,7 +265,7 @@ export const CanvasView: React.FC<CanvasViewProps> = ({ width, onLayout, childre
           
           {/* Render child overlays (like Draggable Text/Arrows/Spotlights) */}
           {children}
-        </LinearGradient>
+        </View>
       </View>
     </View>
   );

@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { View, StyleSheet, Text, ScrollView, TouchableOpacity, Alert, Platform, Switch } from 'react-native';
+import { View, StyleSheet, Text, ScrollView, TouchableOpacity, Alert, Platform, Switch, Image, TextInput } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
 import { useCanvasStore, FrameType, AspectRatioType } from '@/store/canvasStore';
@@ -79,6 +79,10 @@ export default function EditorScreen() {
     showNotch,
     setShowNotch,
     setAnnotations,
+    backgroundType = 'gradient',
+    backgroundImageUri = null,
+    setBackgroundType,
+    setBackgroundImageUri,
   } = useCanvasStore();
 
   const handleCanvasLayout = (e: any) => {
@@ -342,6 +346,21 @@ export default function EditorScreen() {
     }
   };
 
+  const pickBackgroundImage = async () => {
+    haptics.lightImpact();
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: false,
+      quality: 1,
+    });
+
+    if (!result.canceled && result.assets[0].uri) {
+      setBackgroundImageUri(result.assets[0].uri);
+      setBackgroundType('image');
+      haptics.success();
+    }
+  };
+
   const pickSplitScreenshots = async () => {
     haptics.lightImpact();
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -501,28 +520,133 @@ export default function EditorScreen() {
         );
 
       case 'gradient':
+        const solidColors = [
+          '#000000',
+          '#1E293B',
+          '#334155',
+          '#EF4444',
+          '#3B82F6',
+          '#10B981',
+          '#F5F7FA',
+          '#FFFFFF',
+        ];
+
         return (
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.gradientScroll}>
-            {GRADIENTS.map((g) => (
+          <View style={styles.colorPanelContainer}>
+            {/* Background Type Mode Selector Segmented Control */}
+            <View style={styles.colorSegmentRow}>
               <TouchableOpacity
-                key={g.id}
-                style={[
-                  styles.gradientCircle,
-                  backgroundColor === g.id && styles.gradientCircleActive
-                ]}
-                onPress={() => { haptics.lightImpact(); setBackgroundColor(g.id); }}
+                style={[styles.colorSegmentBtn, backgroundType === 'gradient' && styles.colorSegmentBtnActive]}
+                onPress={() => { haptics.lightImpact(); setBackgroundType('gradient'); }}
               >
-                <LinearGradient
-                  colors={g.colors}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  style={styles.gradientCircleFill}
-                >
-                  {backgroundColor === g.id && <View style={styles.gradientDotActive} />}
-                </LinearGradient>
+                <Text style={[styles.colorSegmentText, backgroundType === 'gradient' && styles.colorSegmentTextActive]}>Gradients</Text>
               </TouchableOpacity>
-            ))}
-          </ScrollView>
+              
+              <TouchableOpacity
+                style={[styles.colorSegmentBtn, backgroundType === 'color' && styles.colorSegmentBtnActive]}
+                onPress={() => { haptics.lightImpact(); setBackgroundType('color'); }}
+              >
+                <Text style={[styles.colorSegmentText, backgroundType === 'color' && styles.colorSegmentTextActive]}>Solids</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                style={[styles.colorSegmentBtn, backgroundType === 'image' && styles.colorSegmentBtnActive]}
+                onPress={() => { haptics.lightImpact(); setBackgroundType('image'); }}
+              >
+                <Text style={[styles.colorSegmentText, backgroundType === 'image' && styles.colorSegmentTextActive]}>Backdrop</Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Sub-panel Content based on backgroundType selection */}
+            {backgroundType === 'gradient' && (
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.gradientScroll}>
+                {GRADIENTS.map((g) => (
+                  <TouchableOpacity
+                    key={g.id}
+                    style={[
+                      styles.gradientCircle,
+                      backgroundColor === g.id && styles.gradientCircleActive
+                    ]}
+                    onPress={() => { haptics.lightImpact(); setBackgroundColor(g.id); }}
+                  >
+                    <LinearGradient
+                      colors={g.colors}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 1 }}
+                      style={styles.gradientCircleFill}
+                    >
+                      {backgroundColor === g.id && <View style={styles.gradientDotActive} />}
+                    </LinearGradient>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            )}
+
+            {backgroundType === 'color' && (
+              <View style={styles.solidsPanel}>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.gradientScroll}>
+                  {solidColors.map((color) => (
+                    <TouchableOpacity
+                      key={color}
+                      style={[
+                        styles.gradientCircle,
+                        backgroundColor.toLowerCase() === color.toLowerCase() && styles.gradientCircleActive
+                      ]}
+                      onPress={() => { haptics.lightImpact(); setBackgroundColor(color); }}
+                    >
+                      <View style={[styles.gradientCircleFill, { backgroundColor: color, justifyContent: 'center', alignItems: 'center' }]}>
+                        {backgroundColor.toLowerCase() === color.toLowerCase() && (
+                          <View style={[styles.gradientDotActive, { backgroundColor: color === '#FFFFFF' ? '#000000' : '#FFFFFF' }]} />
+                        )}
+                      </View>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+                <View style={styles.hexInputWrapper}>
+                  <Text style={styles.hexInputPrefix}>HEX</Text>
+                  <TextInput
+                    style={styles.hexInput}
+                    placeholder="#FFFFFF"
+                    placeholderTextColor="#64748B"
+                    value={backgroundColor.startsWith('#') ? backgroundColor : ''}
+                    autoCapitalize="characters"
+                    onChangeText={(text) => {
+                      let hex = text;
+                      if (text.length > 0 && !text.startsWith('#')) {
+                        hex = '#' + text;
+                      }
+                      if (hex.length <= 7) {
+                        setBackgroundColor(hex);
+                      }
+                    }}
+                  />
+                </View>
+              </View>
+            )}
+
+            {backgroundType === 'image' && (
+              <View style={styles.imageBackdropPanel}>
+                {backgroundImageUri ? (
+                  <View style={styles.backdropPreviewRow}>
+                    <View style={styles.backdropThumbContainer}>
+                      <Image source={{ uri: backgroundImageUri }} style={styles.backdropThumb} />
+                      <Text style={styles.backdropThumbLabel} numberOfLines={1}>Custom Backdrop Active</Text>
+                    </View>
+                    <TouchableOpacity
+                      style={styles.backdropActionBtnDelete}
+                      onPress={() => { haptics.lightImpact(); setBackgroundImageUri(null); }}
+                    >
+                      <Text style={styles.backdropActionBtnText}>Remove Backdrop</Text>
+                    </TouchableOpacity>
+                  </View>
+                ) : (
+                  <TouchableOpacity style={styles.backdropUploadBtn} onPress={pickBackgroundImage}>
+                    <Text style={styles.backdropUploadBtnText}>🖼️ Choose Backdrop Photo</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+            )}
+          </View>
         );
 
       case 'adjust':
@@ -1383,5 +1507,125 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     textAlign: 'center',
     lineHeight: 18,
+  },
+  colorPanelContainer: {
+    width: '100%',
+    paddingHorizontal: 8,
+  },
+  colorSegmentRow: {
+    flexDirection: 'row',
+    backgroundColor: '#0F172A',
+    borderRadius: 8,
+    padding: 2,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#334155',
+  },
+  colorSegmentBtn: {
+    flex: 1,
+    paddingVertical: 8,
+    alignItems: 'center',
+    borderRadius: 6,
+  },
+  colorSegmentBtnActive: {
+    backgroundColor: '#1E293B',
+    borderColor: '#38BDF8',
+    borderWidth: 0.5,
+  },
+  colorSegmentText: {
+    color: '#64748B',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  colorSegmentTextActive: {
+    color: '#F8FAFC',
+  },
+  solidsPanel: {
+    width: '100%',
+    gap: 12,
+  },
+  hexInputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#1E293B',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#334155',
+    paddingHorizontal: 12,
+    height: 40,
+    marginTop: 4,
+  },
+  hexInputPrefix: {
+    color: '#64748B',
+    fontSize: 12,
+    fontWeight: 'bold',
+    marginRight: 8,
+  },
+  hexInput: {
+    flex: 1,
+    color: '#F8FAFC',
+    fontSize: 13,
+    fontWeight: '600',
+    padding: 0,
+  },
+  imageBackdropPanel: {
+    width: '100%',
+    paddingVertical: 4,
+  },
+  backdropUploadBtn: {
+    backgroundColor: '#1E293B',
+    borderColor: '#38BDF8',
+    borderWidth: 1,
+    borderStyle: 'dashed',
+    borderRadius: 10,
+    paddingVertical: 14,
+    alignItems: 'center',
+  },
+  backdropUploadBtnText: {
+    color: '#38BDF8',
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  backdropPreviewRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#1E293B',
+    borderRadius: 10,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#334155',
+  },
+  backdropThumbContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    flex: 1,
+  },
+  backdropThumb: {
+    width: 32,
+    height: 32,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#475569',
+  },
+  backdropThumbLabel: {
+    color: '#F8FAFC',
+    fontSize: 12,
+    fontWeight: '500',
+    flex: 1,
+  },
+  backdropActionBtnDelete: {
+    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+    borderColor: '#EF4444',
+    borderWidth: 1,
+    borderRadius: 6,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+  },
+  backdropActionBtnText: {
+    color: '#EF4444',
+    fontSize: 11,
+    fontWeight: '600',
   },
 });

@@ -48,6 +48,8 @@ export interface CanvasSnapshot {
   beforeScreenshotOffsetY: number;
   annotations: AnnotationElement[];
   showNotch: boolean;
+  backgroundType: 'gradient' | 'color' | 'image';
+  backgroundImageUri: string | null;
 }
 
 export interface CanvasState {
@@ -72,6 +74,8 @@ export interface CanvasState {
   exportsHistory: ExportHistoryItem[];
   isPro: boolean;
   showNotch: boolean;
+  backgroundType: 'gradient' | 'color' | 'image';
+  backgroundImageUri: string | null;
 
   // History stacks (in-memory)
   undoStack: CanvasSnapshot[];
@@ -97,6 +101,8 @@ export interface CanvasState {
   setBeforeScreenshotOffsetY: (y: number) => void;
   setProStatus: (status: boolean) => void;
   setShowNotch: (show: boolean) => void;
+  setBackgroundType: (type: 'gradient' | 'color' | 'image') => void;
+  setBackgroundImageUri: (uri: string | null) => void;
   
   // History Actions
   saveHistoryState: () => void;
@@ -178,6 +184,8 @@ const takeSnapshot = (state: CanvasState): CanvasSnapshot => ({
   beforeScreenshotOffsetY: state.beforeScreenshotOffsetY,
   annotations: state.annotations.map((ann) => ({ ...ann })),
   showNotch: state.showNotch,
+  backgroundType: state.backgroundType || 'gradient',
+  backgroundImageUri: state.backgroundImageUri || null,
 });
 
 export const useCanvasStore = create<CanvasState>()(
@@ -204,6 +212,8 @@ export const useCanvasStore = create<CanvasState>()(
       exportsHistory: [],
       isPro: false,
       showNotch: true,
+      backgroundType: 'gradient',
+      backgroundImageUri: null,
 
       // History stacks
       undoStack: [],
@@ -374,6 +384,24 @@ export const useCanvasStore = create<CanvasState>()(
         };
       }),
 
+      setBackgroundType: (type) => set((state) => {
+        const snapshot = takeSnapshot(state);
+        return {
+          backgroundType: type,
+          undoStack: [...state.undoStack, snapshot].slice(-30),
+          redoStack: [],
+        };
+      }),
+
+      setBackgroundImageUri: (uri) => set((state) => {
+        const snapshot = takeSnapshot(state);
+        return {
+          backgroundImageUri: uri,
+          undoStack: [...state.undoStack, snapshot].slice(-30),
+          redoStack: [],
+        };
+      }),
+
       // Undo/Redo core mechanics
       saveHistoryState: () => set((state) => {
         const snapshot = takeSnapshot(state);
@@ -493,6 +521,8 @@ export const useCanvasStore = create<CanvasState>()(
           beforeScreenshotOffsetY: 0,
           frameType: 'iPhone16Pro',
           showNotch: true,
+          backgroundType: 'gradient',
+          backgroundImageUri: null,
           undoStack: [...state.undoStack, snapshot].slice(-30),
           redoStack: [],
         };

@@ -21,6 +21,8 @@ export default function HomeScreen() {
     exportsHistory,
     clearExportsHistory,
     deleteExportFromHistory,
+    setBackgroundType,
+    setBackgroundImageUri,
   } = useCanvasStore();
 
   const [activePresetIndex, setActivePresetIndex] = React.useState(0);
@@ -32,7 +34,7 @@ export default function HomeScreen() {
     const scrollOffset = event.nativeEvent.contentOffset.x;
     const itemWidth = 132; // card width (120) + marginRight (12)
     const index = Math.round(scrollOffset / itemWidth);
-    if (index >= 0 && index < 6) {
+    if (index >= 0 && index < 7) {
       setActivePresetIndex(index);
     }
   };
@@ -162,6 +164,8 @@ export default function HomeScreen() {
                 setIsSplitSliderEnabled(false);
                 setFrameType('SafariBrowser');
                 setBackgroundColor('gradient-sunset');
+                setBackgroundType('gradient');
+                setBackgroundImageUri(null);
                 router.push('/editor');
               }}
             >
@@ -188,6 +192,8 @@ export default function HomeScreen() {
                 setIsSplitSliderEnabled(false);
                 setFrameType('iPhone16Pro');
                 setBackgroundColor('gradient-cyberpunk');
+                setBackgroundType('gradient');
+                setBackgroundImageUri(null);
                 router.push('/editor');
               }}
             >
@@ -212,6 +218,8 @@ export default function HomeScreen() {
                 setIsSplitSliderEnabled(false);
                 setFrameType('iPhone16Pro');
                 setBackgroundColor('gradient-midnight');
+                setBackgroundType('gradient');
+                setBackgroundImageUri(null);
                 router.push('/editor');
               }}
             >
@@ -235,6 +243,8 @@ export default function HomeScreen() {
                 setIsSplitSliderEnabled(false);
                 setFrameType('iPhone16Pro');
                 setBackgroundColor('gradient-emerald');
+                setBackgroundType('gradient');
+                setBackgroundImageUri(null);
                 router.push('/editor');
               }}
             >
@@ -259,18 +269,45 @@ export default function HomeScreen() {
                 setBeforeImageUri(null);
                 setIsSplitSliderEnabled(false);
                 setFrameType('iPhone16Pro');
-                setBackgroundColor('gradient-carbon');
+                setBackgroundColor('gradient-cyberpunk');
+                setBackgroundType('gradient');
+                setBackgroundImageUri(null);
                 router.push('/editor');
               }}
             >
               <View style={styles.presetPreview}>
                 <Svg width={120} height={70} viewBox="0 0 120 70">
-                  <Rect width={120} height={70} rx={8} fill="#00CDAC" opacity={0.12} />
-                  <Rect x={46} y={10} width={28} height={50} rx={4} stroke="#00CDAC" strokeWidth={1.5} fill="none" />
-                  <Rect x={50} y={15} width={20} height={35} rx={3} stroke="#00CDAC" strokeWidth={1} fill="none" opacity={0.6} />
+                  <Rect width={120} height={70} rx={8} fill="#F857A6" opacity={0.12} />
+                  <Rect x={46} y={10} width={28} height={50} rx={4} stroke="#F857A6" strokeWidth={1.5} fill="none" />
+                  <Rect x={50} y={15} width={20} height={35} rx={3} stroke="#F857A6" strokeWidth={1} fill="none" opacity={0.6} />
                 </Svg>
               </View>
-              <Text style={styles.presetLabel}>Product Hunt Gallery</Text>
+              <Text style={styles.presetLabel}>iPhone 6.7" Store</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={styles.presetCard}
+              onPress={() => {
+                haptics.mediumImpact();
+                setAspectRatio('9:16');
+                setImageUri(null);
+                setBeforeImageUri(null);
+                setIsSplitSliderEnabled(false);
+                setFrameType('iPhone16Pro');
+                setBackgroundColor('gradient-ocean');
+                setBackgroundType('gradient');
+                setBackgroundImageUri(null);
+                router.push('/editor');
+              }}
+            >
+              <View style={styles.presetPreview}>
+                <Svg width={120} height={70} viewBox="0 0 120 70">
+                  <Rect width={120} height={70} rx={8} fill="#02AAB0" opacity={0.12} />
+                  <Rect x={48} y={10} width={24} height={50} rx={4} stroke="#02AAB0" strokeWidth={1.5} fill="none" />
+                  <Rect x={52} y={14} width={16} height={42} rx={2} stroke="#02AAB0" strokeWidth={1} fill="none" opacity={0.6} />
+                </Svg>
+              </View>
+              <Text style={styles.presetLabel}>iPhone 5.5" Store</Text>
             </TouchableOpacity>
 
             <TouchableOpacity 
@@ -283,6 +320,8 @@ export default function HomeScreen() {
                 setIsSplitSliderEnabled(false);
                 setFrameType('SafariBrowser');
                 setBackgroundColor('gradient-ocean');
+                setBackgroundType('gradient');
+                setBackgroundImageUri(null);
                 router.push('/editor');
               }}
             >
@@ -293,11 +332,11 @@ export default function HomeScreen() {
                   <Rect x={42} y={16} width={36} height={38} rx={2} stroke="#3A7BD5" strokeWidth={1} fill="none" opacity={0.6} />
                 </Svg>
               </View>
-              <Text style={styles.presetLabel}>12.9" iPad Store</Text>
+              <Text style={styles.presetLabel}>iPad 12.9" Store</Text>
             </TouchableOpacity>
           </ScrollView>
           <View style={styles.carouselDots}>
-            {[0, 1, 2, 3, 4, 5].map((idx) => (
+            {[0, 1, 2, 3, 4, 5, 6].map((idx) => (
               <View 
                 key={idx} 
                 style={[
