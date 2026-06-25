@@ -10,7 +10,6 @@
     "ios": {
       "icon": "./assets/app-icon/icon.png",
       "bundleIdentifier": "com.senthilmkm.mockupbuilder",
-      "buildNumber": "3",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
