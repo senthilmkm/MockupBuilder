@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { View, StyleSheet, Text, ScrollView, TouchableOpacity, Alert, Platform } from 'react-native';
+import { View, StyleSheet, Text, ScrollView, TouchableOpacity, Alert, Platform, Switch } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
 import { useCanvasStore, FrameType, AspectRatioType } from '@/store/canvasStore';
@@ -75,6 +75,8 @@ export default function EditorScreen() {
     setIsSplitSliderEnabled,
     undo,
     redo,
+    showNotch,
+    setShowNotch,
   } = useCanvasStore();
 
   const handleCanvasLayout = (e: any) => {
@@ -538,6 +540,17 @@ export default function EditorScreen() {
                   {renderValueSlider('Padding', padding, 5, 30, setPadding)}
                   {renderValueSlider('3D Tilt Rotation', rotation3D, -30, 30, setRotation3D, (v) => `${v.toFixed(0)}°`)}
                   {renderValueSlider('Drop Shadow', shadowIntensity, 0, 1, setShadowIntensity, (v) => `${(v * 100).toFixed(0)}%`)}
+                  {frameType === 'iPhone16Pro' && (
+                    <View style={styles.toggleRow}>
+                      <Text style={styles.toggleLabel}>Show Bezel Notch</Text>
+                      <Switch
+                        value={showNotch}
+                        onValueChange={(val) => { haptics.lightImpact(); setShowNotch(val); }}
+                        trackColor={{ false: '#334155', true: '#0284C7' }}
+                        thumbColor={showNotch ? '#F8FAFC' : '#94A3B8'}
+                      />
+                    </View>
+                  )}
                 </>
               )}
               {activeAdjustTab === 'after' && (
@@ -1273,5 +1286,22 @@ const styles = StyleSheet.create({
     color: '#64748B',
     fontSize: 12,
     textAlign: 'center',
+  },
+  toggleRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#1E293B',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 10,
+    marginTop: 8,
+    borderWidth: 1,
+    borderColor: '#334155',
+  },
+  toggleLabel: {
+    color: '#F8FAFC',
+    fontSize: 13,
+    fontWeight: '500',
   },
 });

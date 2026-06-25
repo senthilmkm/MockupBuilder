@@ -26,6 +26,7 @@ export const CanvasView: React.FC<CanvasViewProps> = ({ width, onLayout, childre
     screenshotScale = 1.0,
     screenshotOffsetX = 0,
     screenshotOffsetY = 0,
+    showNotch = true,
   } = useCanvasStore();
 
   // Determine height based on aspect ratio
@@ -59,7 +60,45 @@ export const CanvasView: React.FC<CanvasViewProps> = ({ width, onLayout, childre
     if (isSplitSliderEnabled && beforeImageUri && imageUri) {
       return <BeforeAfterSlider />;
     }
-    const activeUri = imageUri || 'https://picsum.photos/id/1074/800/1600';
+
+    if (!imageUri) {
+      // Clean offline dashboard mockup layout placeholder
+      return (
+        <View style={[styles.screenshotContainer, styles.mockUiContainer]}>
+          <View style={styles.mockUiHeader}>
+            <View style={styles.mockUiProfile} />
+            <View style={styles.mockUiSearchLine} />
+          </View>
+          
+          <View style={styles.mockUiCard}>
+            <Text style={styles.mockUiCardLabel}>Sales Overview</Text>
+            <Text style={styles.mockUiCardValue}>$12,480.00</Text>
+            <Text style={styles.mockUiCardSubText}>📈 +18.4% this week</Text>
+          </View>
+          
+          <View style={styles.mockUiChartBg}>
+            <View style={[styles.mockUiChartBar, { height: 35 }]} />
+            <View style={[styles.mockUiChartBar, { height: 60, backgroundColor: '#38BDF8' }]} />
+            <View style={[styles.mockUiChartBar, { height: 28 }]} />
+            <View style={[styles.mockUiChartBar, { height: 75, backgroundColor: '#38BDF8' }]} />
+            <View style={[styles.mockUiChartBar, { height: 45 }]} />
+          </View>
+
+          <View style={styles.mockUiList}>
+            <View style={styles.mockUiListItem}>
+              <View style={styles.mockUiListCircle} />
+              <View style={styles.mockUiListLine} />
+            </View>
+            <View style={styles.mockUiListItem}>
+              <View style={styles.mockUiListCircle} />
+              <View style={[styles.mockUiListLine, { width: '50%' }]} />
+            </View>
+          </View>
+        </View>
+      );
+    }
+
+    const activeUri = imageUri;
     return (
       <View style={styles.screenshotContainer}>
         <Image 
@@ -74,7 +113,7 @@ export const CanvasView: React.FC<CanvasViewProps> = ({ width, onLayout, childre
               ],
             },
           ]} 
-          resizeMode="cover" 
+          resizeMode={frameType === 'MacbookPro' || frameType === 'SafariBrowser' ? 'contain' : 'cover'} 
         />
       </View>
     );
@@ -116,9 +155,9 @@ export const CanvasView: React.FC<CanvasViewProps> = ({ width, onLayout, childre
               {renderScreenContent()}
             </View>
             {/* Dynamic Island */}
-            <View style={styles.dynamicIsland} />
+            {showNotch && <View style={styles.dynamicIsland} />}
             {/* Speaker Slit */}
-            <View style={styles.speakerSlit} />
+            {showNotch && <View style={styles.speakerSlit} />}
           </View>
         );
 
@@ -355,5 +394,95 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: 'rgba(255,255,255,0.15)',
     backgroundColor: 'rgba(255,255,255,0.05)',
+  },
+  // Mock UI Styles
+  mockUiContainer: {
+    padding: 16,
+    justifyContent: 'flex-start',
+    alignItems: 'stretch',
+    gap: 12,
+    height: '100%',
+  },
+  mockUiHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginTop: 20,
+    marginBottom: 10,
+  },
+  mockUiProfile: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255,255,255,0.15)',
+  },
+  mockUiSearchLine: {
+    flex: 1,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+  },
+  mockUiCard: {
+    backgroundColor: '#1E293B',
+    borderRadius: 12,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.06)',
+  },
+  mockUiCardLabel: {
+    color: '#64748B',
+    fontSize: 10,
+    fontWeight: '600',
+    textTransform: 'uppercase',
+    marginBottom: 4,
+  },
+  mockUiCardValue: {
+    color: '#ffffff',
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 4,
+  },
+  mockUiCardSubText: {
+    color: '#10B981',
+    fontSize: 10,
+    fontWeight: '500',
+  },
+  mockUiChartBg: {
+    height: 100,
+    backgroundColor: '#1E293B',
+    borderRadius: 12,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-end',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.06)',
+  },
+  mockUiChartBar: {
+    width: 14,
+    borderRadius: 4,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+  },
+  mockUiList: {
+    gap: 8,
+    marginTop: 4,
+  },
+  mockUiListItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  mockUiListCircle: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+  },
+  mockUiListLine: {
+    width: '70%',
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: 'rgba(255,255,255,0.08)',
   },
 });

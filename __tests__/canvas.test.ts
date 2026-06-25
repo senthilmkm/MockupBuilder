@@ -157,6 +157,21 @@ describe('Zustand Canvas State Store', () => {
     expect(useCanvasStore.getState().isPro).toBeFalsy();
   });
 
+  test('should handle showNotch status changes and undo/redo states', () => {
+    const state = useCanvasStore.getState();
+    expect(state.showNotch).toBeTruthy();
+
+    const { setShowNotch, undo, redo } = useCanvasStore.getState();
+    setShowNotch(false);
+    expect(useCanvasStore.getState().showNotch).toBeFalsy();
+
+    undo();
+    expect(useCanvasStore.getState().showNotch).toBeTruthy();
+
+    redo();
+    expect(useCanvasStore.getState().showNotch).toBeFalsy();
+  });
+
   test('should handle screenshot scale and offset variables', () => {
     const { 
       setScreenshotScale, 

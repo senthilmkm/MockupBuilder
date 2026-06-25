@@ -47,6 +47,7 @@ export interface CanvasSnapshot {
   beforeScreenshotOffsetX: number;
   beforeScreenshotOffsetY: number;
   annotations: AnnotationElement[];
+  showNotch: boolean;
 }
 
 export interface CanvasState {
@@ -70,6 +71,7 @@ export interface CanvasState {
   annotations: AnnotationElement[];
   exportsHistory: ExportHistoryItem[];
   isPro: boolean;
+  showNotch: boolean;
 
   // History stacks (in-memory)
   undoStack: CanvasSnapshot[];
@@ -94,6 +96,7 @@ export interface CanvasState {
   setBeforeScreenshotOffsetX: (x: number) => void;
   setBeforeScreenshotOffsetY: (y: number) => void;
   setProStatus: (status: boolean) => void;
+  setShowNotch: (show: boolean) => void;
   
   // History Actions
   saveHistoryState: () => void;
@@ -173,6 +176,7 @@ const takeSnapshot = (state: CanvasState): CanvasSnapshot => ({
   beforeScreenshotOffsetX: state.beforeScreenshotOffsetX,
   beforeScreenshotOffsetY: state.beforeScreenshotOffsetY,
   annotations: state.annotations.map((ann) => ({ ...ann })),
+  showNotch: state.showNotch,
 });
 
 export const useCanvasStore = create<CanvasState>()(
@@ -198,6 +202,7 @@ export const useCanvasStore = create<CanvasState>()(
       annotations: [],
       exportsHistory: [],
       isPro: false,
+      showNotch: true,
 
       // History stacks
       undoStack: [],
@@ -359,6 +364,15 @@ export const useCanvasStore = create<CanvasState>()(
 
       setProStatus: (status) => set({ isPro: status }),
 
+      setShowNotch: (show) => set((state) => {
+        const snapshot = takeSnapshot(state);
+        return {
+          showNotch: show,
+          undoStack: [...state.undoStack, snapshot].slice(-30),
+          redoStack: [],
+        };
+      }),
+
       // Undo/Redo core mechanics
       saveHistoryState: () => set((state) => {
         const snapshot = takeSnapshot(state);
@@ -475,6 +489,7 @@ export const useCanvasStore = create<CanvasState>()(
           beforeScreenshotOffsetX: 0,
           beforeScreenshotOffsetY: 0,
           frameType: 'iPhone16Pro',
+          showNotch: true,
           undoStack: [...state.undoStack, snapshot].slice(-30),
           redoStack: [],
         };
