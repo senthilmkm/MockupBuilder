@@ -11,6 +11,7 @@ import { exportEngine } from '@/services/exportEngine';
 import { haptics } from '@/services/haptics';
 import { router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
+import { FeedSimulator } from '@/components/FeedSimulator';
 
 export default function EditorScreen() {
   const insets = useSafeAreaInsets();
@@ -83,6 +84,10 @@ export default function EditorScreen() {
     backgroundImageUri = null,
     setBackgroundType,
     setBackgroundImageUri,
+    feedMode = 'None',
+    hasBorderGlow = false,
+    setFeedMode,
+    setHasBorderGlow,
   } = useCanvasStore();
 
   const handleCanvasLayout = (e: any) => {
@@ -504,18 +509,35 @@ export default function EditorScreen() {
           { id: 'None', label: 'None (Flat Card)' },
         ];
         return (
-          <View style={styles.menuList}>
-            {frames.map((f) => (
-              <TouchableOpacity
-                key={f.id}
-                style={[styles.menuOptionBtn, frameType === f.id && styles.menuOptionBtnActive]}
-                onPress={() => { haptics.lightImpact(); setFrameType(f.id); }}
-              >
-                <Text style={[styles.menuOptionText, frameType === f.id && styles.menuOptionTextActive]}>
-                  {f.label}
-                </Text>
-              </TouchableOpacity>
-            ))}
+          <View style={styles.framePanelContainer}>
+            <View style={styles.menuList}>
+              {frames.map((f) => (
+                <TouchableOpacity
+                  key={f.id}
+                  style={[styles.menuOptionBtn, frameType === f.id && styles.menuOptionBtnActive]}
+                  onPress={() => { haptics.lightImpact(); setFrameType(f.id); }}
+                >
+                  <Text style={[styles.menuOptionText, frameType === f.id && styles.menuOptionTextActive]}>
+                    {f.label}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            {frameType !== 'None' && (
+              <View style={styles.toggleRowBorderGlow}>
+                <Text style={styles.toggleLabelBorderGlow}>Border Contrast Glow</Text>
+                <TouchableOpacity 
+                  style={[styles.glowToggleBtn, hasBorderGlow && styles.glowToggleBtnActive]} 
+                  onPress={() => {
+                    haptics.mediumImpact();
+                    setHasBorderGlow(!hasBorderGlow);
+                  }}
+                >
+                  <Text style={[styles.glowToggleText, hasBorderGlow && { color: '#38BDF8' }]}>{hasBorderGlow ? 'ON' : 'OFF'}</Text>
+                </TouchableOpacity>
+              </View>
+            )}
           </View>
         );
 
@@ -893,20 +915,22 @@ export default function EditorScreen() {
       {/* Dynamic Canvas Workspace viewport */}
       <View style={styles.canvasWrapper} onLayout={handleCanvasLayout}>
         {displayWidth > 0 && displayHeight > 0 && (
-          <View 
-            ref={canvasRef} 
-            collapsable={false} 
-            style={{ 
-              width: displayWidth, 
-              height: displayHeight, 
-              position: 'relative',
-              justifyContent: 'center',
-              alignItems: 'center'
-            }}
-          >
-            <CanvasView width={displayWidth} isWatermarkVisible={!isPro || isWatermarkEnabled} />
-            <AnnotationLayer canvasWidth={displayWidth} canvasHeight={displayHeight} />
-          </View>
+          <FeedSimulator mode={feedMode}>
+            <View 
+              ref={canvasRef} 
+              collapsable={false} 
+              style={{ 
+                width: displayWidth, 
+                height: displayHeight, 
+                position: 'relative',
+                justifyContent: 'center',
+                alignItems: 'center'
+              }}
+            >
+              <CanvasView width={displayWidth} isWatermarkVisible={!isPro || isWatermarkEnabled} />
+              <AnnotationLayer canvasWidth={displayWidth} canvasHeight={displayHeight} />
+            </View>
+          </FeedSimulator>
         )}
 
         {/* Sandbox Direct Actions Overlay (Visible only when no screenshot is imported) */}
@@ -932,6 +956,32 @@ export default function EditorScreen() {
           </View>
         )}
       </View>
+
+      {/* Feed Simulator Control Bar */}
+      {imageUri && (
+        <View style={styles.feedModeToggleContainer}>
+          <Text style={styles.feedModeToggleLabel}>Feed Simulator</Text>
+          <View style={styles.feedModeToggleRow}>
+            {(['None', 'Twitter', 'LinkedIn'] as const).map((mode) => (
+              <TouchableOpacity
+                key={mode}
+                style={[
+                  styles.feedModeToggleBtn,
+                  feedMode === mode && styles.feedModeToggleBtnActive
+                ]}
+                onPress={() => { haptics.lightImpact(); setFeedMode(mode); }}
+              >
+                <Text style={[
+                  styles.feedModeToggleText,
+                  feedMode === mode && styles.feedModeToggleTextActive
+                ]}>
+                  {mode === 'None' ? 'Clean Mock' : mode}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+      )}
 
       {/* Editor Sub-Menu selection options */}
       <View style={styles.editorControls}>
@@ -1132,6 +1182,8 @@ const styles = StyleSheet.create({
   },
   ratioScroll: {
     flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 10,
   },
   ratioScrollContent: {
     gap: 8,
@@ -1169,6 +1221,87 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 10,
+  },
+  framePanelContainer: {
+    width: '100%',
+    gap: 12,
+  },
+  toggleRowBorderGlow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#1E293B',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 10,
+    marginTop: 4,
+    borderWidth: 1,
+    borderColor: '#334155',
+  },
+  toggleLabelBorderGlow: {
+    color: '#F8FAFC',
+    fontSize: 13,
+    fontWeight: '500',
+  },
+  glowToggleBtn: {
+    backgroundColor: '#334155',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 6,
+  },
+  glowToggleBtnActive: {
+    backgroundColor: 'rgba(56, 189, 248, 0.15)',
+    borderColor: '#38BDF8',
+    borderWidth: 1,
+  },
+  glowToggleText: {
+    color: '#94A3B8',
+    fontSize: 11,
+    fontWeight: 'bold',
+  },
+  feedModeToggleContainer: {
+    backgroundColor: 'rgba(30, 41, 59, 0.7)',
+    borderRadius: 12,
+    padding: 10,
+    marginHorizontal: 16,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
+  },
+  feedModeToggleLabel: {
+    color: '#64748B',
+    fontSize: 10,
+    fontWeight: 'bold',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: 6,
+    textAlign: 'center',
+  },
+  feedModeToggleRow: {
+    flexDirection: 'row',
+    backgroundColor: '#0F172A',
+    borderRadius: 8,
+    padding: 2,
+    gap: 4,
+  },
+  feedModeToggleBtn: {
+    flex: 1,
+    paddingVertical: 8,
+    alignItems: 'center',
+    borderRadius: 6,
+  },
+  feedModeToggleBtnActive: {
+    backgroundColor: '#1E293B',
+    borderColor: 'rgba(56, 189, 248, 0.4)',
+    borderWidth: 0.5,
+  },
+  feedModeToggleText: {
+    color: '#64748B',
+    fontSize: 11,
+    fontWeight: '600',
+  },
+  feedModeToggleTextActive: {
+    color: '#38BDF8',
   },
   carouselDot: {
     width: 6,

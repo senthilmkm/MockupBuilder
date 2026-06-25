@@ -50,6 +50,8 @@ export interface CanvasSnapshot {
   showNotch: boolean;
   backgroundType: 'gradient' | 'color' | 'image';
   backgroundImageUri: string | null;
+  feedMode: 'None' | 'Twitter' | 'LinkedIn';
+  hasBorderGlow: boolean;
 }
 
 export interface CanvasState {
@@ -76,6 +78,8 @@ export interface CanvasState {
   showNotch: boolean;
   backgroundType: 'gradient' | 'color' | 'image';
   backgroundImageUri: string | null;
+  feedMode: 'None' | 'Twitter' | 'LinkedIn';
+  hasBorderGlow: boolean;
 
   // History stacks (in-memory)
   undoStack: CanvasSnapshot[];
@@ -103,6 +107,8 @@ export interface CanvasState {
   setShowNotch: (show: boolean) => void;
   setBackgroundType: (type: 'gradient' | 'color' | 'image') => void;
   setBackgroundImageUri: (uri: string | null) => void;
+  setFeedMode: (mode: 'None' | 'Twitter' | 'LinkedIn') => void;
+  setHasBorderGlow: (glow: boolean) => void;
   
   // History Actions
   saveHistoryState: () => void;
@@ -186,6 +192,8 @@ const takeSnapshot = (state: CanvasState): CanvasSnapshot => ({
   showNotch: state.showNotch,
   backgroundType: state.backgroundType || 'gradient',
   backgroundImageUri: state.backgroundImageUri || null,
+  feedMode: state.feedMode || 'None',
+  hasBorderGlow: state.hasBorderGlow || false,
 });
 
 export const useCanvasStore = create<CanvasState>()(
@@ -214,6 +222,8 @@ export const useCanvasStore = create<CanvasState>()(
       showNotch: true,
       backgroundType: 'gradient',
       backgroundImageUri: null,
+      feedMode: 'None',
+      hasBorderGlow: false,
 
       // History stacks
       undoStack: [],
@@ -402,6 +412,24 @@ export const useCanvasStore = create<CanvasState>()(
         };
       }),
 
+      setFeedMode: (mode) => set((state) => {
+        const snapshot = takeSnapshot(state);
+        return {
+          feedMode: mode,
+          undoStack: [...state.undoStack, snapshot].slice(-30),
+          redoStack: [],
+        };
+      }),
+
+      setHasBorderGlow: (glow) => set((state) => {
+        const snapshot = takeSnapshot(state);
+        return {
+          hasBorderGlow: glow,
+          undoStack: [...state.undoStack, snapshot].slice(-30),
+          redoStack: [],
+        };
+      }),
+
       // Undo/Redo core mechanics
       saveHistoryState: () => set((state) => {
         const snapshot = takeSnapshot(state);
@@ -523,6 +551,8 @@ export const useCanvasStore = create<CanvasState>()(
           showNotch: true,
           backgroundType: 'gradient',
           backgroundImageUri: null,
+          feedMode: 'None',
+          hasBorderGlow: false,
           undoStack: [...state.undoStack, snapshot].slice(-30),
           redoStack: [],
         };

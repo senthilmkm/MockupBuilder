@@ -30,6 +30,7 @@ export const CanvasView: React.FC<CanvasViewProps> = ({ width, onLayout, childre
     showNotch = true,
     backgroundType = 'gradient',
     backgroundImageUri = null,
+    hasBorderGlow = false,
   } = useCanvasStore();
 
   // Determine height based on aspect ratio
@@ -160,10 +161,29 @@ export const CanvasView: React.FC<CanvasViewProps> = ({ width, onLayout, childre
       ],
     };
 
+    const borderGlowStyle = hasBorderGlow ? {
+      borderWidth: 2.5,
+      borderColor: '#38BDF8',
+      ...Platform.select({
+        ios: {
+          shadowColor: '#38BDF8',
+          shadowOffset: { width: 0, height: 0 },
+          shadowOpacity: 0.9,
+          shadowRadius: 10,
+        },
+        android: {
+          elevation: 12,
+        },
+        web: {
+          boxShadow: '0 0 12px #38BDF8',
+        },
+      }),
+    } : {};
+
     switch (frameType) {
       case 'iPhone16Pro':
         return (
-          <View style={[styles.phoneBezel, { borderColor: frameColor }, shadowStyle, rotationStyle]}>
+          <View style={[styles.phoneBezel, { borderColor: hasBorderGlow ? '#38BDF8' : frameColor }, shadowStyle, rotationStyle, borderGlowStyle]}>
             {/* Phone Screen Container */}
             <View style={styles.phoneScreen}>
               {renderScreenContent()}
@@ -183,7 +203,7 @@ export const CanvasView: React.FC<CanvasViewProps> = ({ width, onLayout, childre
       case 'SafariBrowser':
       case 'MacbookPro':
         return (
-          <View style={[styles.browserWindow, shadowStyle, rotationStyle]}>
+          <View style={[styles.browserWindow, shadowStyle, rotationStyle, borderGlowStyle]}>
             {/* Browser Header Bar */}
             <View style={styles.browserHeader}>
               <View style={styles.windowControls}>
