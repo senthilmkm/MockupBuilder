@@ -50,7 +50,7 @@ export interface CanvasSnapshot {
   showNotch: boolean;
   backgroundType: 'gradient' | 'color' | 'image';
   backgroundImageUri: string | null;
-  feedMode: 'None' | 'Twitter' | 'LinkedIn';
+  feedMode: 'None' | 'Twitter' | 'LinkedIn' | 'ProductHunt';
   hasBorderGlow: boolean;
 }
 
@@ -78,7 +78,7 @@ export interface CanvasState {
   showNotch: boolean;
   backgroundType: 'gradient' | 'color' | 'image';
   backgroundImageUri: string | null;
-  feedMode: 'None' | 'Twitter' | 'LinkedIn';
+  feedMode: 'None' | 'Twitter' | 'LinkedIn' | 'ProductHunt';
   hasBorderGlow: boolean;
 
   // History stacks (in-memory)
@@ -107,7 +107,7 @@ export interface CanvasState {
   setShowNotch: (show: boolean) => void;
   setBackgroundType: (type: 'gradient' | 'color' | 'image') => void;
   setBackgroundImageUri: (uri: string | null) => void;
-  setFeedMode: (mode: 'None' | 'Twitter' | 'LinkedIn') => void;
+  setFeedMode: (mode: 'None' | 'Twitter' | 'LinkedIn' | 'ProductHunt') => void;
   setHasBorderGlow: (glow: boolean) => void;
   
   // History Actions

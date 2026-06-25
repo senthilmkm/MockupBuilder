@@ -962,7 +962,7 @@ export default function EditorScreen() {
         <View style={styles.feedModeToggleContainer}>
           <Text style={styles.feedModeToggleLabel}>Feed Simulator</Text>
           <View style={styles.feedModeToggleRow}>
-            {(['None', 'Twitter', 'LinkedIn'] as const).map((mode) => (
+            {(['None', 'Twitter', 'LinkedIn', 'ProductHunt'] as const).map((mode) => (
               <TouchableOpacity
                 key={mode}
                 style={[
@@ -975,7 +975,7 @@ export default function EditorScreen() {
                   styles.feedModeToggleText,
                   feedMode === mode && styles.feedModeToggleTextActive
                 ]}>
-                  {mode === 'None' ? 'Clean Mock' : mode}
+                  {mode === 'None' ? 'Clean Mock' : mode === 'ProductHunt' ? 'Product Hunt' : mode}
                 </Text>
               </TouchableOpacity>
             ))}

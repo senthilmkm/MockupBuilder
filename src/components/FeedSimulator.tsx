@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, StyleSheet, Text, Platform } from 'react-native';
 
-export type FeedSimulatorMode = 'Twitter' | 'LinkedIn' | 'None';
+export type FeedSimulatorMode = 'Twitter' | 'LinkedIn' | 'ProductHunt' | 'None';
 
 interface FeedSimulatorProps {
   mode: FeedSimulatorMode;
@@ -110,9 +110,81 @@ export const FeedSimulator: React.FC<FeedSimulatorProps> = ({ mode, children }) 
     );
   };
 
+  const renderProductHuntFeed = () => {
+    return (
+      <View style={styles.phCard}>
+        {/* Product Hunt Header */}
+        <View style={styles.postHeader}>
+          <View style={styles.phBadgeContainer}>
+            <Text style={styles.phBadgeP}>P</Text>
+          </View>
+          <View style={styles.profileDetails}>
+            <Text style={styles.phTitle}>MockupBuilder</Text>
+            <Text style={styles.phTagline}>Beautify app screenshots in seconds 📱</Text>
+            <View style={styles.phCategoryRow}>
+              <View style={styles.phCategoryBadge}>
+                <Text style={styles.phCategoryText}>DESIGN TOOLS</Text>
+              </View>
+              <View style={styles.phCategoryBadge}>
+                <Text style={styles.phCategoryText}>DEVELOPER TOOLS</Text>
+              </View>
+            </View>
+          </View>
+        </View>
+
+        {/* Media (Mockup Canvas) */}
+        <View style={styles.phMediaContainer}>
+          {children}
+        </View>
+
+        {/* Product Hunt Action Footer */}
+        <View style={styles.phFooter}>
+          <View style={styles.phUpvoteBtn}>
+            <Text style={styles.phUpvoteText}>▲ UPVOTE 384</Text>
+          </View>
+          <View style={styles.phCommentBtn}>
+            <Text style={styles.phCommentText}>💬 Discuss (42)</Text>
+          </View>
+        </View>
+      </View>
+    );
+  };
+
+  const getContainerBg = () => {
+    switch (mode) {
+      case 'Twitter':
+        return '#0F1419';
+      case 'LinkedIn':
+        return '#1D2226';
+      case 'ProductHunt':
+        return '#F3F4F6';
+      default:
+        return '#0F1419';
+    }
+  };
+
+  const getContainerBorderColor = () => {
+    switch (mode) {
+      case 'Twitter':
+        return '#38444d';
+      case 'LinkedIn':
+        return '#38434F';
+      case 'ProductHunt':
+        return '#E5E7EB';
+      default:
+        return '#38444d';
+    }
+  };
+
   return (
-    <View style={styles.container}>
-      {mode === 'Twitter' ? renderTwitterFeed() : renderLinkedInFeed()}
+    <View style={[styles.container, { backgroundColor: getContainerBg(), borderColor: getContainerBorderColor() }]}>
+      {mode === 'Twitter' ? (
+        renderTwitterFeed()
+      ) : mode === 'LinkedIn' ? (
+        renderLinkedInFeed()
+      ) : (
+        renderProductHuntFeed()
+      )}
     </View>
   );
 };
@@ -285,6 +357,100 @@ const styles = StyleSheet.create({
   },
   linkedinActionText: {
     color: '#9E9E9E',
+    fontSize: 11,
+    fontWeight: '600',
+  },
+  // Product Hunt Styles
+  phCard: {
+    width: '100%',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 8,
+    paddingVertical: 14,
+    paddingHorizontal: 14,
+    borderWidth: 1,
+    borderColor: '#F0F0F0',
+  },
+  phBadgeContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#FF6154',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  phBadgeP: {
+    color: '#FFFFFF',
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
+  phTitle: {
+    color: '#212936',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  phTagline: {
+    color: '#4B586E',
+    fontSize: 12,
+    marginTop: 2,
+  },
+  phCategoryRow: {
+    flexDirection: 'row',
+    gap: 6,
+    marginTop: 6,
+  },
+  phCategoryBadge: {
+    backgroundColor: '#F3F4F6',
+    paddingVertical: 2,
+    paddingHorizontal: 6,
+    borderRadius: 4,
+  },
+  phCategoryText: {
+    color: '#4B586E',
+    fontSize: 8,
+    fontWeight: 'bold',
+  },
+  phMediaContainer: {
+    width: '100%',
+    borderRadius: 6,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    marginTop: 10,
+    backgroundColor: '#F9FAFB',
+  },
+  phFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 12,
+    gap: 10,
+  },
+  phUpvoteBtn: {
+    flex: 1.5,
+    backgroundColor: '#FF6154',
+    height: 38,
+    borderRadius: 4,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  phUpvoteText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: 'bold',
+    letterSpacing: 0.5,
+  },
+  phCommentBtn: {
+    flex: 1,
+    borderColor: '#D1D5DB',
+    borderWidth: 1,
+    height: 38,
+    borderRadius: 4,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+  },
+  phCommentText: {
+    color: '#4B586E',
     fontSize: 11,
     fontWeight: '600',
   },
