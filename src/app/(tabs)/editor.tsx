@@ -21,6 +21,8 @@ export default function EditorScreen() {
   const [activeRatioIndex, setActiveRatioIndex] = useState(0);
   const [sliderWidths, setSliderWidths] = useState<Record<string, number>>({});
   const [activeAdjustTab, setActiveAdjustTab] = useState<'canvas' | 'after' | 'before'>('canvas');
+  const [isBulkExporting, setIsBulkExporting] = useState(false);
+  const [bulkProgress, setBulkProgress] = useState({ current: 0, total: 0 });
 
   const handleRatioScroll = (event: any) => {
     const scrollOffset = event.nativeEvent.contentOffset.x;
@@ -204,6 +206,100 @@ export default function EditorScreen() {
       const fileName = `Spec_${Date.now()}.csv`;
       addExportToHistory(fileName, frameType, aspectRatio, localUri);
       useAlertsStore.getState().addAlert('CSV Spec Exported', 'Generated and saved CSV design specification.', 'Just now');
+    }
+  };
+
+  const handleBulkExport = async () => {
+    if (!isPro) {
+      haptics.error();
+      Alert.alert(
+        'Pro Subscription Required',
+        'Bulk Export is a premium feature. Please upgrade to MockupBuilder Pro to save multiple layouts in one click.',
+        [
+          { text: 'Unlock Pro', onPress: () => router.push('/paywall') },
+          { text: 'Cancel', style: 'cancel' }
+        ]
+      );
+      return;
+    }
+
+    haptics.lightImpact();
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsMultipleSelection: true,
+      selectionLimit: 10,
+      quality: 1,
+    });
+
+    if (result.canceled || !result.assets || result.assets.length === 0) {
+      return;
+    }
+
+    const total = result.assets.length;
+
+    if (Platform.OS !== 'web') {
+      try {
+        const MediaLibrary = require('expo-media-library');
+        const { status } = await MediaLibrary.requestPermissionsAsync();
+        if (status !== 'granted') {
+          haptics.error();
+          Alert.alert('Permission Denied', 'Please allow gallery permissions to save bulk mockups.');
+          return;
+        }
+      } catch (err) {
+        console.warn('Media Library request warning:', err);
+      }
+    }
+
+    const originalUri = imageUri;
+    setIsBulkExporting(true);
+    setBulkProgress({ current: 1, total });
+
+    const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+    try {
+      for (let i = 0; i < total; i++) {
+        const asset = result.assets[i];
+        
+        setImageUri(asset.uri);
+        setBulkProgress({ current: i + 1, total });
+        
+        await sleep(800);
+        
+        const { captureRef } = require('react-native-view-shot');
+        const localUri = await captureRef(canvasRef.current || canvasRef, {
+          format: 'png',
+          quality: 1.0,
+        });
+
+        if (Platform.OS !== 'web') {
+          const MediaLibrary = require('expo-media-library');
+          await MediaLibrary.Asset.create(localUri);
+          
+          const fileName = `Mockup_Bulk_${Date.now()}_${i + 1}.png`;
+          addExportToHistory(fileName, frameType, aspectRatio, localUri);
+        }
+      }
+      
+      haptics.success();
+      useAlertsStore.getState().addAlert(
+        'Bulk Export Success',
+        `Successfully saved ${total} beautified mockups to your gallery.`,
+        'Just now'
+      );
+      
+      Alert.alert(
+        'Bulk Export Complete',
+        `All ${total} screenshots were successfully converted and saved to your Photos gallery.`,
+        [{ text: 'Awesome' }]
+      );
+    } catch (err: any) {
+      haptics.error();
+      Alert.alert('Bulk Export Failed', err.message || 'An error occurred during bulk rendering.');
+    } finally {
+      setImageUri(originalUri);
+      setIsBulkExporting(false);
     }
   };
 
@@ -507,6 +603,12 @@ export default function EditorScreen() {
               </TouchableOpacity>
             </View>
 
+            <View style={styles.exportRow}>
+              <TouchableOpacity style={[styles.exportBtn, { backgroundColor: '#8B5CF6', flex: 1 }]} onPress={handleBulkExport}>
+                <Text style={styles.exportBtnText}>📸 Bulk Export (Save Multiple)</Text>
+              </TouchableOpacity>
+            </View>
+
             {/* Watermark Toggle with Paywall check warning */}
             <View style={styles.watermarkRow}>
               <Text style={styles.watermarkLabel}>Enable Watermark (`made with MockupBuilder`)</Text>
@@ -688,6 +790,28 @@ export default function EditorScreen() {
             </TouchableOpacity>
           </View>
         </View>
+
+        {isBulkExporting && (
+          <View style={styles.loadingOverlay}>
+            <View style={styles.loadingCard}>
+              <Text style={styles.loadingTitle}>Processing Bulk Mockups</Text>
+              <Text style={styles.loadingProgress}>
+                Saving {bulkProgress.current} of {bulkProgress.total}
+              </Text>
+              <View style={styles.progressBarBg}>
+                <View 
+                  style={[
+                    styles.progressBarFill, 
+                    { width: `${(bulkProgress.current / bulkProgress.total) * 100}%` }
+                  ]} 
+                />
+              </View>
+              <Text style={styles.loadingSubtitle}>
+                Please don't close the app or lock your screen.
+              </Text>
+            </View>
+          </View>
+        )}
     </View>
   );
 }
@@ -1098,5 +1222,56 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     letterSpacing: 1,
     marginBottom: 4,
+  },
+  loadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(15, 23, 42, 0.85)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 999,
+  },
+  loadingCard: {
+    backgroundColor: '#1E293B',
+    borderRadius: 16,
+    borderWidth: 1.5,
+    borderColor: '#334155',
+    padding: 24,
+    width: '80%',
+    alignItems: 'center',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.5,
+    shadowRadius: 15,
+    elevation: 10,
+  },
+  loadingTitle: {
+    color: '#ffffff',
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 8,
+  },
+  loadingProgress: {
+    color: '#38BDF8',
+    fontSize: 15,
+    fontWeight: '600',
+    marginBottom: 16,
+  },
+  progressBarBg: {
+    width: '100%',
+    height: 8,
+    backgroundColor: '#0F172A',
+    borderRadius: 4,
+    marginBottom: 16,
+    overflow: 'hidden',
+  },
+  progressBarFill: {
+    height: '100%',
+    backgroundColor: '#0284C7',
+    borderRadius: 4,
+  },
+  loadingSubtitle: {
+    color: '#64748B',
+    fontSize: 12,
+    textAlign: 'center',
   },
 });
