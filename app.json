@@ -40,7 +40,14 @@
           }
         }
       ],
-      "expo-sharing"
+      "expo-sharing",
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Allow MockupBuilder to access your photos to import screenshots and save mockup images.",
+          "savePhotosPermission": "Allow MockupBuilder to save generated mockups to your photo gallery."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

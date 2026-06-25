@@ -18,8 +18,13 @@ export default function RootLayout() {
       const initRevenueCat = async () => {
         try {
           const Purchases = require('react-native-purchases').default;
-          // Set up iOS API key
-          Purchases.configure({ apiKey: 'appl_uVJYQCXjPoHnmTpPkBpGlWVpKoW' });
+          const apiKey = Platform.select({
+            ios: 'appl_uVJYQCXjPoHnmTpPkBpGlWVpKoW',
+            android: 'goog_placeholder_android_key',
+          });
+          if (apiKey) {
+            Purchases.configure({ apiKey });
+          }
           
           const customerInfo = await Purchases.getCustomerInfo();
           const isProActive = customerInfo.entitlements.active['pro_access'] !== undefined;
