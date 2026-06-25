@@ -24,7 +24,30 @@ export const BeforeAfterSlider: React.FC = () => {
     setParentDimensions({ width, height });
   };
 
-  if (!imageUri || !beforeImageUri) return null;
+  if (!imageUri || !beforeImageUri) {
+    return (
+      <View style={styles.errorContainer}>
+        <View style={styles.errorIconContainer}>
+          <Text style={styles.errorIcon}>🌓</Text>
+        </View>
+        <Text style={styles.errorTitle}>Split Comparison</Text>
+        <Text style={styles.errorSubtitle}>
+          Import both screenshots to enable the comparison slider.
+        </Text>
+        
+        <View style={styles.statusBox}>
+          <View style={styles.statusRow}>
+            <Text style={styles.statusBullet}>{beforeImageUri ? '🟢' : '⚪'}</Text>
+            <Text style={styles.statusText}>Before: {beforeImageUri ? 'Loaded' : 'Empty'}</Text>
+          </View>
+          <View style={styles.statusRow}>
+            <Text style={styles.statusBullet}>{imageUri ? '🟢' : '⚪'}</Text>
+            <Text style={styles.statusText}>After: {imageUri ? 'Loaded' : 'Empty'}</Text>
+          </View>
+        </View>
+      </View>
+    );
+  }
 
   const sliderLeft = `${sliderPosition}%`;
   const { width: pWidth, height: pHeight } = parentDimensions;
@@ -214,5 +237,67 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: 'bold',
     textTransform: 'uppercase',
+  },
+  errorContainer: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#151515',
+    padding: 24,
+  },
+  errorIconContainer: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  errorIcon: {
+    fontSize: 24,
+  },
+  errorTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#ffffff',
+    marginBottom: 6,
+    textAlign: 'center',
+    fontFamily: Platform.OS === 'ios' ? 'Outfit' : 'sans-serif-medium',
+  },
+  errorSubtitle: {
+    fontSize: 12,
+    color: '#9CA3AF',
+    textAlign: 'center',
+    marginBottom: 20,
+    lineHeight: 16,
+    paddingHorizontal: 8,
+  },
+  statusBox: {
+    backgroundColor: '#1E1E1E',
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    width: '100%',
+    maxWidth: 220,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
+  },
+  statusRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 3,
+    gap: 6,
+  },
+  statusBullet: {
+    fontSize: 10,
+  },
+  statusText: {
+    color: '#D1D5DB',
+    fontSize: 11,
   },
 });

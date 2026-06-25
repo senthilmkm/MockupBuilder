@@ -59,7 +59,19 @@ class ExportEngineService {
         Alert.alert('Saved!', 'Beautified mockup saved to your Photos.');
       } else {
         // Web download fallback
-        Alert.alert('Success', 'PNG generated successfully!');
+        try {
+          const link = window.document.createElement('a');
+          link.href = localUri;
+          link.download = `mockup_${Date.now()}.png`;
+          window.document.body.appendChild(link);
+          link.click();
+          window.document.body.removeChild(link);
+          haptics.success();
+          Alert.alert('Saved!', 'Beautified mockup downloaded to your device.');
+        } catch (webErr: any) {
+          console.error('Web download error:', webErr);
+          Alert.alert('Success', 'PNG generated successfully!');
+        }
       }
 
       return localUri;

@@ -77,6 +77,7 @@ export default function EditorScreen() {
     redo,
     showNotch,
     setShowNotch,
+    setAnnotations,
   } = useCanvasStore();
 
   const handleCanvasLayout = (e: any) => {
@@ -255,8 +256,10 @@ export default function EditorScreen() {
     }
 
     const originalUri = imageUri;
+    const originalAnnotations = [...annotations];
     setIsBulkExporting(true);
     setBulkProgress({ current: 1, total });
+    setAnnotations([]);
 
     const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -301,6 +304,7 @@ export default function EditorScreen() {
       Alert.alert('Bulk Export Failed', err.message || 'An error occurred during bulk rendering.');
     } finally {
       setImageUri(originalUri);
+      setAnnotations(originalAnnotations);
       setIsBulkExporting(false);
     }
   };

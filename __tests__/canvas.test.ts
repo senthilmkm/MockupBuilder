@@ -277,4 +277,15 @@ describe('Zustand Canvas State Store', () => {
     expect(useCanvasStore.getState().undoStack).toHaveLength(2);
     expect(useCanvasStore.getState().redoStack).toHaveLength(0);
   });
+
+  test('should handle setAnnotations action to bulk set active annotations', () => {
+    const { setAnnotations } = useCanvasStore.getState();
+    const newAnnotations = [
+      { id: 'ann-test-1', type: 'Text' as const, x: 10, y: 20, scale: 1.2 },
+      { id: 'ann-test-2', type: 'Arrow' as const, x: 50, y: 60, scale: 1.0 }
+    ];
+    setAnnotations(newAnnotations);
+    expect(useCanvasStore.getState().annotations).toHaveLength(2);
+    expect(useCanvasStore.getState().annotations[0].id).toBe('ann-test-1');
+  });
 });

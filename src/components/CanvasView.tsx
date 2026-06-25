@@ -58,7 +58,7 @@ export const CanvasView: React.FC<CanvasViewProps> = ({ width, onLayout, childre
   const gradientColors = getGradientColors(backgroundColor);
 
   const renderScreenContent = () => {
-    if (isSplitSliderEnabled && beforeImageUri && imageUri) {
+    if (isSplitSliderEnabled) {
       return <BeforeAfterSlider />;
     }
 

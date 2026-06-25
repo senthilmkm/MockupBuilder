@@ -107,6 +107,7 @@ export interface CanvasState {
   addAnnotation: (type: 'Text' | 'Arrow' | 'Spotlight') => void;
   updateAnnotation: (id: string, updates: Partial<AnnotationElement>, saveToHistory?: boolean) => void;
   deleteAnnotation: (id: string) => void;
+  setAnnotations: (annotations: AnnotationElement[]) => void;
   addExportToHistory: (fileName: string, frameType: string, aspectRatio: string, imageUri: string) => void;
   clearExportsHistory: () => void;
   deleteExportFromHistory: (id: string) => void;
@@ -451,6 +452,8 @@ export const useCanvasStore = create<CanvasState>()(
           redoStack: [],
         };
       }),
+
+      setAnnotations: (annotations) => set({ annotations }),
 
       addExportToHistory: (fileName, frameType, aspectRatio, imageUri) => set((state) => {
         const newItem: ExportHistoryItem = {
