@@ -19,7 +19,7 @@ export default function RootLayout() {
         try {
           const Purchases = require('react-native-purchases').default;
           // Set up iOS API key
-          Purchases.configure({ apiKey: 'appl_sVbOskwWwZpLREBvWzQxHlPdEyg' });
+          Purchases.configure({ apiKey: 'appl_uVJYQCXjPoHnmTpPkBpGlWVpKoW' });
           
           const customerInfo = await Purchases.getCustomerInfo();
           const isProActive = customerInfo.entitlements.active['pro_access'] !== undefined;
