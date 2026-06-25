@@ -33,7 +33,7 @@ export default function PrivacyScreen() {
       
       <Text style={styles.sectionTitle}>4. Contact Us</Text>
       <Text style={styles.bodyText}>
-        If you have any questions, feel free to contact us at support@mockupbuilder.indie
+        If you have any questions, feel free to contact us at senthil930@gmail.com
       </Text>
     </ScrollView>
   );
