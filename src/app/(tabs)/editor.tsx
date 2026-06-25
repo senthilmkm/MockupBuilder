@@ -554,18 +554,34 @@ export default function EditorScreen() {
                 </>
               )}
               {activeAdjustTab === 'after' && (
-                <>
-                  {renderValueSlider('Screenshot Zoom', screenshotScale, 0.5, 2.5, setScreenshotScale, (v) => `${(v * 100).toFixed(0)}%`)}
-                  {renderValueSlider('Offset X (Horizontal)', screenshotOffsetX, -150, 150, setScreenshotOffsetX, (v) => `${v.toFixed(0)}px`)}
-                  {renderValueSlider('Offset Y (Vertical)', screenshotOffsetY, -150, 150, setScreenshotOffsetY, (v) => `${v.toFixed(0)}px`)}
-                </>
+                imageUri ? (
+                  <>
+                    {renderValueSlider('Screenshot Zoom', screenshotScale, 0.5, 2.5, setScreenshotScale, (v) => `${(v * 100).toFixed(0)}%`)}
+                    {renderValueSlider('Offset X (Horizontal)', screenshotOffsetX, -150, 150, setScreenshotOffsetX, (v) => `${v.toFixed(0)}px`)}
+                    {renderValueSlider('Offset Y (Vertical)', screenshotOffsetY, -150, 150, setScreenshotOffsetY, (v) => `${v.toFixed(0)}px`)}
+                  </>
+                ) : (
+                  <View style={styles.disabledAdjustCard}>
+                    <Text style={styles.disabledAdjustText}>
+                      Import your screenshot in the Home tab to adjust scaling and offsets.
+                    </Text>
+                  </View>
+                )
               )}
               {activeAdjustTab === 'before' && isSplitSliderEnabled && (
-                <>
-                  {renderValueSlider('Before Zoom', beforeScreenshotScale, 0.5, 2.5, setBeforeScreenshotScale, (v) => `${(v * 100).toFixed(0)}%`)}
-                  {renderValueSlider('Before Offset X', beforeScreenshotOffsetX, -150, 150, setBeforeScreenshotOffsetX, (v) => `${v.toFixed(0)}px`)}
-                  {renderValueSlider('Before Offset Y', beforeScreenshotOffsetY, -150, 150, setBeforeScreenshotOffsetY, (v) => `${v.toFixed(0)}px`)}
-                </>
+                beforeImageUri ? (
+                  <>
+                    {renderValueSlider('Before Zoom', beforeScreenshotScale, 0.5, 2.5, setBeforeScreenshotScale, (v) => `${(v * 100).toFixed(0)}%`)}
+                    {renderValueSlider('Before Offset X', beforeScreenshotOffsetX, -150, 150, setBeforeScreenshotOffsetX, (v) => `${v.toFixed(0)}px`)}
+                    {renderValueSlider('Before Offset Y', beforeScreenshotOffsetY, -150, 150, setBeforeScreenshotOffsetY, (v) => `${v.toFixed(0)}px`)}
+                  </>
+                ) : (
+                  <View style={styles.disabledAdjustCard}>
+                    <Text style={styles.disabledAdjustText}>
+                      Import a "Before" screenshot to adjust comparison scaling and offsets.
+                    </Text>
+                  </View>
+                )
               )}
             </ScrollView>
           </View>
@@ -716,15 +732,8 @@ export default function EditorScreen() {
       {/* Dynamic Canvas Workspace viewport */}
       <View style={styles.canvasWrapper} onLayout={handleCanvasLayout}>
         <View ref={canvasRef} collapsable={false} style={{ width: '100%', height: getCanvasHeight(), position: 'relative' }}>
-          <CanvasView width={canvasWidth} />
+          <CanvasView width={canvasWidth} isWatermarkVisible={!isPro || isWatermarkEnabled} />
           <AnnotationLayer canvasWidth={canvasWidth} canvasHeight={getCanvasHeight()} />
-          
-          {/* Watermark Overlay (Locked to right bottom - forced if not Pro) */}
-          {(!isPro || isWatermarkEnabled) && (
-            <View style={styles.canvasWatermark}>
-               <Text style={styles.watermarkText}>made with MockupBuilder</Text>
-            </View>
-          )}
 
           {/* Sandbox Direct Actions Overlay (Visible only when no screenshot is imported) */}
           {!imageUri && (
@@ -1303,5 +1312,22 @@ const styles = StyleSheet.create({
     color: '#F8FAFC',
     fontSize: 13,
     fontWeight: '500',
+  },
+  disabledAdjustCard: {
+    backgroundColor: '#1E293B',
+    borderColor: '#334155',
+    borderWidth: 1,
+    borderRadius: 10,
+    padding: 20,
+    marginHorizontal: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  disabledAdjustText: {
+    color: '#64748B',
+    fontSize: 13,
+    fontWeight: '500',
+    textAlign: 'center',
+    lineHeight: 18,
   },
 });

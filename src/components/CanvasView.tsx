@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, Image, Platform, DimensionValue } from 'react-native';
+import { View, StyleSheet, Image, Platform, DimensionValue, Text } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { getGradientColors } from '@/constants/gradients';
 import { useCanvasStore, FrameType, AspectRatioType } from '@/store/canvasStore';
@@ -9,9 +9,10 @@ interface CanvasViewProps {
   width: number;
   onLayout?: (event: any) => void;
   children?: React.ReactNode; // For layering annotations on top
+  isWatermarkVisible?: boolean;
 }
 
-export const CanvasView: React.FC<CanvasViewProps> = ({ width, onLayout, children }) => {
+export const CanvasView: React.FC<CanvasViewProps> = ({ width, onLayout, children, isWatermarkVisible }) => {
   const {
     imageUri,
     beforeImageUri,
@@ -153,6 +154,11 @@ export const CanvasView: React.FC<CanvasViewProps> = ({ width, onLayout, childre
             {/* Phone Screen Container */}
             <View style={styles.phoneScreen}>
               {renderScreenContent()}
+              {isWatermarkVisible && (
+                <View style={styles.screenshotWatermark}>
+                  <Text style={styles.screenshotWatermarkText}>made with MockupBuilder</Text>
+                </View>
+              )}
             </View>
             {/* Dynamic Island */}
             {showNotch && <View style={styles.dynamicIsland} />}
@@ -182,6 +188,11 @@ export const CanvasView: React.FC<CanvasViewProps> = ({ width, onLayout, childre
             {/* Screen Content */}
             <View style={styles.browserScreen}>
               {renderScreenContent()}
+              {isWatermarkVisible && (
+                <View style={styles.screenshotWatermark}>
+                  <Text style={styles.screenshotWatermarkText}>made with MockupBuilder</Text>
+                </View>
+              )}
             </View>
           </View>
         );
@@ -191,6 +202,11 @@ export const CanvasView: React.FC<CanvasViewProps> = ({ width, onLayout, childre
         return (
           <View style={[styles.flatCard, shadowStyle, rotationStyle]}>
             {renderScreenContent()}
+            {isWatermarkVisible && (
+              <View style={styles.screenshotWatermark}>
+                <Text style={styles.screenshotWatermarkText}>made with MockupBuilder</Text>
+              </View>
+            )}
           </View>
         );
     }
@@ -484,5 +500,21 @@ const styles = StyleSheet.create({
     height: 6,
     borderRadius: 3,
     backgroundColor: 'rgba(255,255,255,0.08)',
+  },
+  screenshotWatermark: {
+    position: 'absolute',
+    bottom: 12,
+    alignSelf: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.55)',
+    paddingVertical: 3,
+    paddingHorizontal: 8,
+    borderRadius: 4,
+    zIndex: 99,
+  },
+  screenshotWatermarkText: {
+    color: 'rgba(255, 255, 255, 0.45)',
+    fontSize: 8,
+    fontWeight: 'bold',
+    letterSpacing: 0.5,
   },
 });
