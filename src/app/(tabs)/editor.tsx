@@ -10,6 +10,7 @@ import { GRADIENTS } from '@/constants/gradients';
 import { exportEngine } from '@/services/exportEngine';
 import { haptics } from '@/services/haptics';
 import { router } from 'expo-router';
+import { LinearGradient } from 'expo-linear-gradient';
 
 export default function EditorScreen() {
   const insets = useSafeAreaInsets();
@@ -19,6 +20,7 @@ export default function EditorScreen() {
   const [isWatermarkEnabled, setIsWatermarkEnabled] = useState(true);
   const [activeRatioIndex, setActiveRatioIndex] = useState(0);
   const [sliderWidths, setSliderWidths] = useState<Record<string, number>>({});
+  const [activeAdjustTab, setActiveAdjustTab] = useState<'canvas' | 'after' | 'before'>('canvas');
 
   const handleRatioScroll = (event: any) => {
     const scrollOffset = event.nativeEvent.contentOffset.x;
@@ -386,41 +388,78 @@ export default function EditorScreen() {
                 key={g.id}
                 style={[
                   styles.gradientCircle,
-                  backgroundColor === g.id && styles.gradientCircleActive,
-                  { backgroundColor: g.colors[0] }
+                  backgroundColor === g.id && styles.gradientCircleActive
                 ]}
                 onPress={() => { haptics.lightImpact(); setBackgroundColor(g.id); }}
               >
-                {backgroundColor === g.id && <View style={styles.gradientDotActive} />}
+                <LinearGradient
+                  colors={g.colors}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.gradientCircleFill}
+                >
+                  {backgroundColor === g.id && <View style={styles.gradientDotActive} />}
+                </LinearGradient>
               </TouchableOpacity>
             ))}
           </ScrollView>
         );
 
       case 'adjust':
-        return (
-          <ScrollView contentContainerStyle={styles.adjustScrollContent} showsVerticalScrollIndicator={false}>
-            <Text style={styles.adjustSectionHeader}>Canvas & Tilt</Text>
-            {renderValueSlider('Padding', padding, 5, 30, setPadding)}
-            {renderValueSlider('3D Tilt Rotation', rotation3D, -30, 30, setRotation3D, (v) => `${v.toFixed(0)}°`)}
-            {renderValueSlider('Drop Shadow', shadowIntensity, 0, 1, setShadowIntensity, (v) => `${(v * 100).toFixed(0)}%`)}
-            
-            <Text style={[styles.adjustSectionHeader, { marginTop: 16 }]}>
-              {isSplitSliderEnabled ? 'Bezel Image (After) Alignment' : 'Bezel Image Alignment'}
-            </Text>
-            {renderValueSlider('Screenshot Zoom', screenshotScale, 0.5, 2.5, setScreenshotScale, (v) => `${(v * 100).toFixed(0)}%`)}
-            {renderValueSlider('Offset X (Horizontal)', screenshotOffsetX, -150, 150, setScreenshotOffsetX, (v) => `${v.toFixed(0)}px`)}
-            {renderValueSlider('Offset Y (Vertical)', screenshotOffsetY, -150, 150, setScreenshotOffsetY, (v) => `${v.toFixed(0)}px`)}
-
+        const renderAdjustSelector = () => (
+          <View style={styles.adjustTabRow}>
+            <TouchableOpacity 
+              style={[styles.adjustTabBtn, activeAdjustTab === 'canvas' && styles.adjustTabBtnActive]} 
+              onPress={() => { haptics.lightImpact(); setActiveAdjustTab('canvas'); }}
+            >
+              <Text style={[styles.adjustTabBtnText, activeAdjustTab === 'canvas' && styles.adjustTabBtnTextActive]}>Canvas</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={[styles.adjustTabBtn, activeAdjustTab === 'after' && styles.adjustTabBtnActive]} 
+              onPress={() => { haptics.lightImpact(); setActiveAdjustTab('after'); }}
+            >
+              <Text style={[styles.adjustTabBtnText, activeAdjustTab === 'after' && styles.adjustTabBtnTextActive]}>
+                {isSplitSliderEnabled ? 'After Image' : 'Image'}
+              </Text>
+            </TouchableOpacity>
             {isSplitSliderEnabled && (
-              <>
-                <Text style={[styles.adjustSectionHeader, { marginTop: 16 }]}>Bezel Image (Before) Alignment</Text>
-                {renderValueSlider('Before Zoom', beforeScreenshotScale, 0.5, 2.5, setBeforeScreenshotScale, (v) => `${(v * 100).toFixed(0)}%`)}
-                {renderValueSlider('Before Offset X', beforeScreenshotOffsetX, -150, 150, setBeforeScreenshotOffsetX, (v) => `${v.toFixed(0)}px`)}
-                {renderValueSlider('Before Offset Y', beforeScreenshotOffsetY, -150, 150, setBeforeScreenshotOffsetY, (v) => `${v.toFixed(0)}px`)}
-              </>
+              <TouchableOpacity 
+                style={[styles.adjustTabBtn, activeAdjustTab === 'before' && styles.adjustTabBtnActive]} 
+                onPress={() => { haptics.lightImpact(); setActiveAdjustTab('before'); }}
+              >
+                <Text style={[styles.adjustTabBtnText, activeAdjustTab === 'before' && styles.adjustTabBtnTextActive]}>Before Image</Text>
+              </TouchableOpacity>
             )}
-          </ScrollView>
+          </View>
+        );
+
+        return (
+          <View style={styles.adjustWrapper}>
+            {renderAdjustSelector()}
+            <ScrollView style={styles.adjustScroll} contentContainerStyle={styles.adjustScrollContent} showsVerticalScrollIndicator={false}>
+              {activeAdjustTab === 'canvas' && (
+                <>
+                  {renderValueSlider('Padding', padding, 5, 30, setPadding)}
+                  {renderValueSlider('3D Tilt Rotation', rotation3D, -30, 30, setRotation3D, (v) => `${v.toFixed(0)}°`)}
+                  {renderValueSlider('Drop Shadow', shadowIntensity, 0, 1, setShadowIntensity, (v) => `${(v * 100).toFixed(0)}%`)}
+                </>
+              )}
+              {activeAdjustTab === 'after' && (
+                <>
+                  {renderValueSlider('Screenshot Zoom', screenshotScale, 0.5, 2.5, setScreenshotScale, (v) => `${(v * 100).toFixed(0)}%`)}
+                  {renderValueSlider('Offset X (Horizontal)', screenshotOffsetX, -150, 150, setScreenshotOffsetX, (v) => `${v.toFixed(0)}px`)}
+                  {renderValueSlider('Offset Y (Vertical)', screenshotOffsetY, -150, 150, setScreenshotOffsetY, (v) => `${v.toFixed(0)}px`)}
+                </>
+              )}
+              {activeAdjustTab === 'before' && isSplitSliderEnabled && (
+                <>
+                  {renderValueSlider('Before Zoom', beforeScreenshotScale, 0.5, 2.5, setBeforeScreenshotScale, (v) => `${(v * 100).toFixed(0)}%`)}
+                  {renderValueSlider('Before Offset X', beforeScreenshotOffsetX, -150, 150, setBeforeScreenshotOffsetX, (v) => `${v.toFixed(0)}px`)}
+                  {renderValueSlider('Before Offset Y', beforeScreenshotOffsetY, -150, 150, setBeforeScreenshotOffsetY, (v) => `${v.toFixed(0)}px`)}
+                </>
+              )}
+            </ScrollView>
+          </View>
         );
 
       case 'annotate':
@@ -752,9 +791,9 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 6,
   },
-  // Editor Toolbars
+  // Editor Toolbars (Glassmorphic)
   editorControls: {
-    backgroundColor: '#1E293B',
+    backgroundColor: 'rgba(15, 23, 42, 0.85)',
     borderTopWidth: 1,
     borderColor: '#334155',
     paddingBottom: 28,
@@ -885,18 +924,53 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     marginRight: 10,
     borderWidth: 2,
-    borderColor: '#334155',
-    justifyContent: 'center',
-    alignItems: 'center',
+    borderColor: 'transparent',
+    overflow: 'hidden',
   },
   gradientCircleActive: {
-    borderColor: '#ffffff',
+    borderColor: '#38BDF8',
+  },
+  gradientCircleFill: {
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   gradientDotActive: {
     width: 8,
     height: 8,
     borderRadius: 4,
     backgroundColor: '#ffffff',
+  },
+  // Segmented adjusting tab rows
+  adjustTabRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 8,
+    marginBottom: 12,
+  },
+  adjustTabBtn: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 16,
+    backgroundColor: '#0F172A',
+    borderWidth: 1,
+    borderColor: '#334155',
+  },
+  adjustTabBtnActive: {
+    backgroundColor: 'rgba(56, 189, 248, 0.08)',
+    borderColor: '#38BDF8',
+  },
+  adjustTabBtnText: {
+    color: '#64748B',
+    fontSize: 11,
+    fontWeight: 'bold',
+  },
+  adjustTabBtnTextActive: {
+    color: '#38BDF8',
+  },
+  adjustScroll: {
+    maxHeight: 120,
   },
   // Export list controls
   exportList: {

@@ -158,40 +158,58 @@ export const CanvasView: React.FC<CanvasViewProps> = ({ width, onLayout, childre
   };
 
   return (
-    <View
-      onLayout={onLayout}
-      style={[
-        styles.canvasContainer,
-        {
-          width: width,
-          height: canvasHeight,
-        },
-      ]}
-    >
-      <LinearGradient
-        colors={gradientColors}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={styles.gradientBackdrop}
+    <View style={styles.canvasShadowWrapper}>
+      <View
+        onLayout={onLayout}
+        style={[
+          styles.canvasContainer,
+          {
+            width: width,
+            height: canvasHeight,
+          },
+        ]}
       >
-        {/* Canvas Padding Layout Wrapper */}
-        <View style={[styles.paddingWrapper, { padding: `${padding}%` as DimensionValue }]}>
-          {renderDeviceFrame()}
-        </View>
-        
-        {/* Render child overlays (like Draggable Text/Arrows/Spotlights) */}
-        {children}
-      </LinearGradient>
+        <LinearGradient
+          colors={gradientColors}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.gradientBackdrop}
+        >
+          {/* Canvas Padding Layout Wrapper */}
+          <View style={[styles.paddingWrapper, { padding: `${padding}%` as DimensionValue }]}>
+            {renderDeviceFrame()}
+          </View>
+          
+          {/* Render child overlays (like Draggable Text/Arrows/Spotlights) */}
+          {children}
+        </LinearGradient>
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  canvasShadowWrapper: {
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000000',
+        shadowOffset: { width: 0, height: 10 },
+        shadowOpacity: 0.45,
+        shadowRadius: 18,
+      },
+      android: {
+        elevation: 12,
+      },
+      web: {
+        filter: 'drop-shadow(0px 10px 20px rgba(0,0,0,0.5))',
+      },
+    }),
+  },
   canvasContainer: {
     overflow: 'hidden',
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
+    borderColor: 'rgba(255,255,255,0.12)',
   },
   gradientBackdrop: {
     flex: 1,
