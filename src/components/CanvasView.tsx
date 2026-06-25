@@ -46,7 +46,7 @@ export const CanvasView: React.FC<CanvasViewProps> = ({ width, onLayout, childre
       case '3:4':
         return (width * 4) / 3;
       case 'AppStore':
-        return width * 1.5; // Custom 2:3 or 6.5" mockup height ratio
+        return width * (2796 / 1290); // Custom iPhone 6.7" aspect ratio (1290 x 2796)
       case 'iPadStore':
         return (width * 4) / 3; // 12.9" iPad aspect ratio
       default:

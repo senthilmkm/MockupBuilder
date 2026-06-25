@@ -33,7 +33,12 @@ export default function PaywallScreen() {
       const offerings = await Purchases.getOfferings();
       if (offerings.current !== null && offerings.current.availablePackages.length > 0) {
         // Map UI selection to corresponding package type
-        const expectedType = selectedPlan === 'annual' ? 'annual' : 'monthly';
+        let expectedType = 'monthly';
+        if (selectedPlan === 'annual') {
+          expectedType = 'annual';
+        } else if (selectedPlan === 'lifetime') {
+          expectedType = 'lifetime';
+        }
         const packageToBuy = offerings.current.availablePackages.find(
           (pkg: any) => pkg.packageType.toLowerCase() === expectedType
         ) || offerings.current.availablePackages[0];
