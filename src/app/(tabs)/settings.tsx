@@ -8,7 +8,7 @@ import pricing from '@/constants/pricing.json';
 
 export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
-  const { clearAll } = useCanvasStore();
+  const { clearAll, isPro } = useCanvasStore();
   
   // Settings States
   const [hapticEnabled, setHapticEnabled] = useState(haptics.getHapticsEnabled());
@@ -80,14 +80,31 @@ export default function SettingsScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionHeader}>Subscription</Text>
           <TouchableOpacity 
-            style={styles.premiumCard}
-            onPress={() => { haptics.mediumImpact(); router.push('/paywall'); }}
+            style={[styles.premiumCard, isPro && styles.premiumCardActiveStatus]}
+            onPress={() => { 
+              haptics.mediumImpact(); 
+              if (isPro) {
+                Alert.alert(
+                  'Subscription Active', 
+                  'Your MockupBuilder Pro subscription is active. Thank you for your support!',
+                  [{ text: 'OK' }]
+                );
+              } else {
+                router.push('/paywall'); 
+              }
+            }}
           >
             <View style={styles.premiumTextWrapper}>
-              <Text style={styles.premiumTitle}>{pricing.appBanner.title}</Text>
-              <Text style={styles.premiumSubtitle}>{pricing.appBanner.subtitle}</Text>
+              <Text style={[styles.premiumTitle, isPro && styles.premiumTitleActive]}>
+                {isPro ? 'MockupBuilder Pro Active' : pricing.appBanner.title}
+              </Text>
+              <Text style={styles.premiumSubtitle}>
+                {isPro ? 'You have unlimited access to all premium features.' : pricing.appBanner.subtitle}
+              </Text>
             </View>
-            <Text style={styles.premiumBadge}>{pricing.appBanner.badge}</Text>
+            <Text style={[styles.premiumBadge, isPro && styles.premiumBadgeActive]}>
+              {isPro ? 'Active' : pricing.appBanner.badge}
+            </Text>
           </TouchableOpacity>
         </View>
       )}
@@ -242,6 +259,16 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: 'bold',
     overflow: 'hidden',
+  },
+  premiumCardActiveStatus: {
+    backgroundColor: 'rgba(16, 185, 129, 0.08)',
+    borderColor: '#10B981',
+  },
+  premiumTitleActive: {
+    color: '#34D399',
+  },
+  premiumBadgeActive: {
+    backgroundColor: '#10B981',
   },
   // Settings Item Rows
   row: {
