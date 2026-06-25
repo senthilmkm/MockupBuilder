@@ -51,7 +51,7 @@
       "price": "$59.99 Once",
       "saving": "One-time payment forever",
       "isPopular": false,
-      "enabled": true
+      "enabled": false
     }
   ]
 }
