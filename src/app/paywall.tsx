@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, Text, ScrollView, TouchableOpacity, Alert, Platform } from 'react-native';
+import { View, StyleSheet, Text, ScrollView, TouchableOpacity, Alert, Platform, Linking } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { haptics } from '@/services/haptics';
@@ -8,8 +8,23 @@ import pricing from '@/constants/pricing.json';
 
 export default function PaywallScreen() {
   const insets = useSafeAreaInsets();
+  const { isPro } = useCanvasStore();
   const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'annual' | 'lifetime'>('annual');
   const [isPurchasing, setIsPurchasing] = useState(false);
+
+  const handleManageSubscription = () => {
+    haptics.lightImpact();
+    const url = Platform.OS === 'ios'
+      ? 'https://apps.apple.com/account/subscriptions'
+      : 'https://play.google.com/store/account/subscriptions';
+
+    Linking.openURL(url).catch(() => {
+      Alert.alert(
+        'Manage Subscription',
+        'Please open your device settings (Settings -> Apple Account / Google Account -> Subscriptions) to manage your active plan.'
+      );
+    });
+  };
 
   const handlePurchase = async () => {
     haptics.mediumImpact();
@@ -160,12 +175,16 @@ export default function PaywallScreen() {
 
       {/* CTA Button */}
       <TouchableOpacity 
-        style={[styles.ctaButton, isPurchasing && styles.ctaDisabled]} 
-        onPress={handlePurchase}
+        style={[
+          styles.ctaButton, 
+          isPurchasing && styles.ctaDisabled,
+          isPro && styles.ctaActivePro
+        ]} 
+        onPress={isPro ? handleManageSubscription : handlePurchase}
         disabled={isPurchasing}
       >
         <Text style={styles.ctaButtonText}>
-          {isPurchasing ? 'Processing...' : 'Unlock Pro Access'}
+          {isPurchasing ? 'Processing...' : isPro ? 'Manage Active Subscription' : 'Unlock Pro Access'}
         </Text>
       </TouchableOpacity>
 
@@ -340,6 +359,9 @@ const styles = StyleSheet.create({
   },
   ctaDisabled: {
     backgroundColor: '#475569',
+  },
+  ctaActivePro: {
+    backgroundColor: '#10B981',
   },
   ctaButtonText: {
     color: '#ffffff',

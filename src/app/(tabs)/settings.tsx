@@ -84,26 +84,7 @@ export default function SettingsScreen() {
             style={[styles.premiumCard, isPro && styles.premiumCardActiveStatus]}
             onPress={() => { 
               haptics.mediumImpact(); 
-              if (isPro) {
-                Alert.alert(
-                  'Subscription Active', 
-                  'Your MockupBuilder Pro subscription is active. Thank you for your support!',
-                  [
-                    { 
-                      text: 'Manage Subscription', 
-                      onPress: () => {
-                        haptics.lightImpact();
-                        Linking.openURL('https://apps.apple.com/account/subscriptions').catch(() => {
-                          Alert.alert('Error', 'Could not open subscription management. Please open Settings app -> Apple Account -> Subscriptions.');
-                        });
-                      }
-                    },
-                    { text: 'OK', style: 'cancel' }
-                  ]
-                );
-              } else {
-                router.push('/paywall'); 
-              }
+              router.push('/paywall'); 
             }}
           >
             <View style={styles.premiumTextWrapper}>
