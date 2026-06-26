@@ -11,6 +11,45 @@ export default function PaywallScreen() {
   const { isPro } = useCanvasStore();
   const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'annual' | 'lifetime'>('annual');
   const [isPurchasing, setIsPurchasing] = useState(false);
+  const [activePlanId, setActivePlanId] = useState<'monthly' | 'annual' | 'lifetime' | null>(null);
+
+  React.useEffect(() => {
+    if (isPro) {
+      if (Platform.OS === 'web') {
+        setActivePlanId('annual');
+        setSelectedPlan('annual');
+        return;
+      }
+
+      const checkActivePlan = async () => {
+        try {
+          const Purchases = require('react-native-purchases').default;
+          const customerInfo = await Purchases.getCustomerInfo();
+          const proEntitlement = customerInfo.entitlements.active['pro_access'];
+          if (proEntitlement) {
+            const prodId = proEntitlement.productIdentifier.toLowerCase();
+            let matchedPlan: 'monthly' | 'annual' | 'lifetime' | null = null;
+            if (prodId.includes('monthly')) {
+              matchedPlan = 'monthly';
+            } else if (prodId.includes('annual') || prodId.includes('yearly')) {
+              matchedPlan = 'annual';
+            } else if (prodId.includes('lifetime') || prodId.includes('one_time')) {
+              matchedPlan = 'lifetime';
+            }
+
+            if (matchedPlan) {
+              setActivePlanId(matchedPlan);
+              setSelectedPlan(matchedPlan);
+            }
+          }
+        } catch (err) {
+          console.warn('Failed to fetch customer info:', err);
+        }
+      };
+
+      checkActivePlan();
+    }
+  }, [isPro]);
 
   const handleManageSubscription = () => {
     haptics.lightImpact();
@@ -36,6 +75,7 @@ export default function PaywallScreen() {
         setIsPurchasing(false);
         haptics.success();
         useCanvasStore.getState().setProStatus(true);
+        setActivePlanId(selectedPlan);
         Alert.alert('Congratulations!', 'You are now a MockupBuilder Pro member!', [
           { text: 'Awesome', onPress: () => router.back() }
         ]);
@@ -63,6 +103,15 @@ export default function PaywallScreen() {
         useCanvasStore.getState().setProStatus(isProActive);
 
         if (isProActive) {
+          const proEntitlement = customerInfo.entitlements.active['pro_access'];
+          if (proEntitlement) {
+            const prodId = proEntitlement.productIdentifier.toLowerCase();
+            let matchedPlan: 'monthly' | 'annual' | 'lifetime' | null = null;
+            if (prodId.includes('monthly')) matchedPlan = 'monthly';
+            else if (prodId.includes('annual') || prodId.includes('yearly')) matchedPlan = 'annual';
+            else if (prodId.includes('lifetime') || prodId.includes('one_time')) matchedPlan = 'lifetime';
+            if (matchedPlan) setActivePlanId(matchedPlan);
+          }
           haptics.success();
           Alert.alert('Success!', 'Thank you for upgrading to MockupBuilder Pro!', [
             { text: 'OK', onPress: () => router.back() }
@@ -92,6 +141,7 @@ export default function PaywallScreen() {
         setIsPurchasing(false);
         haptics.success();
         useCanvasStore.getState().setProStatus(true);
+        setActivePlanId('annual');
         Alert.alert('Restored', 'Your Pro purchases have been successfully restored.');
       }, 1000);
       return;
@@ -104,6 +154,15 @@ export default function PaywallScreen() {
       useCanvasStore.getState().setProStatus(isProActive);
 
       if (isProActive) {
+        const proEntitlement = customerInfo.entitlements.active['pro_access'];
+        if (proEntitlement) {
+          const prodId = proEntitlement.productIdentifier.toLowerCase();
+          let matchedPlan: 'monthly' | 'annual' | 'lifetime' | null = null;
+          if (prodId.includes('monthly')) matchedPlan = 'monthly';
+          else if (prodId.includes('annual') || prodId.includes('yearly')) matchedPlan = 'annual';
+          else if (prodId.includes('lifetime') || prodId.includes('one_time')) matchedPlan = 'lifetime';
+          if (matchedPlan) setActivePlanId(matchedPlan);
+        }
         haptics.success();
         Alert.alert('Restored', 'Your Pro subscription has been successfully restored!', [
           { text: 'Awesome', onPress: () => router.back() }
@@ -129,7 +188,7 @@ export default function PaywallScreen() {
           <Text style={styles.closeText}>Close</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.restoreBtn} onPress={handleRestore}>
-          <Text style={restoreTextStyle()}>Restore</Text>
+          <Text style={restoreTextStyle()}>Restore Purchases</Text>
         </TouchableOpacity>
       </View>
 
@@ -157,14 +216,22 @@ export default function PaywallScreen() {
           .map((plan) => (
             <TouchableOpacity 
               key={plan.id}
-              style={[styles.planCard, selectedPlan === plan.id && styles.planCardActive]} 
+              style={[
+                styles.planCard, 
+                selectedPlan === plan.id && styles.planCardActive,
+                (isPro && plan.id === activePlanId) && styles.planCardActivePro
+              ]} 
               onPress={() => { haptics.lightImpact(); setSelectedPlan(plan.id as any); }}
             >
-              {plan.isPopular && (
+              {isPro && plan.id === activePlanId ? (
+                <View style={styles.badgeActivePlan}>
+                  <Text style={styles.badgeActivePlanText}>🟢 ACTIVE PLAN</Text>
+                </View>
+              ) : plan.isPopular ? (
                 <View style={styles.badgePopular}>
                   <Text style={styles.badgePopularText}>BEST VALUE</Text>
                 </View>
-              )}
+              ) : null}
               <Text style={styles.planName}>{plan.name}</Text>
               <Text style={styles.planPrice}>{plan.price}</Text>
               <Text style={styles.planSaving}>{plan.saving}</Text>
@@ -307,6 +374,10 @@ const styles = StyleSheet.create({
     borderColor: '#0284C7',
     backgroundColor: 'rgba(2, 132, 199, 0.08)',
   },
+  planCardActivePro: {
+    borderColor: '#10B981',
+    backgroundColor: 'rgba(16, 185, 129, 0.08)',
+  },
   badgePopular: {
     position: 'absolute',
     top: -9,
@@ -317,6 +388,20 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   badgePopularText: {
+    color: '#ffffff',
+    fontSize: 9,
+    fontWeight: 'bold',
+  },
+  badgeActivePlan: {
+    position: 'absolute',
+    top: -9,
+    right: 16,
+    backgroundColor: '#10B981',
+    paddingVertical: 3,
+    paddingHorizontal: 8,
+    borderRadius: 10,
+  },
+  badgeActivePlanText: {
     color: '#ffffff',
     fontSize: 9,
     fontWeight: 'bold',
