@@ -14,6 +14,8 @@ export default function SettingsScreen() {
   const [hapticEnabled, setHapticEnabled] = useState(haptics.getHapticsEnabled());
   const [pushEnabled, setPushEnabled] = useState(true);
   const [saveLocation, setSaveLocation] = useState<'photos' | 'filesystem'>('photos');
+  const [devModeEnabled, setDevModeEnabled] = useState(false);
+  const [versionTapCount, setVersionTapCount] = useState(0);
 
   const toggleHaptics = (val: boolean) => {
     haptics.lightImpact();
@@ -66,6 +68,53 @@ export default function SettingsScreen() {
           [{ text: 'OK' }]
         );
       });
+  };
+
+  const handleVersionTap = () => {
+    const nextCount = versionTapCount + 1;
+    if (nextCount >= 5) {
+      haptics.mediumImpact();
+      setDevModeEnabled(!devModeEnabled);
+      setVersionTapCount(0);
+      Alert.alert(
+        !devModeEnabled ? 'Developer Menu Enabled' : 'Developer Menu Disabled',
+        !devModeEnabled ? 'Hidden reset settings are now visible.' : 'Hidden settings have been disabled.'
+      );
+    } else {
+      haptics.lightImpact();
+      setVersionTapCount(nextCount);
+    }
+  };
+
+  const handleResetAll = () => {
+    haptics.mediumImpact();
+    Alert.alert(
+      'Hard Reset App & Account?',
+      'This will clear your local designs, reset all settings, and sign out of the active sandbox subscription cache.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { 
+          text: 'Reset', 
+          style: 'destructive',
+          onPress: async () => {
+            clearAll();
+            useCanvasStore.getState().setProStatus(false);
+            
+            if (Platform.OS !== 'web') {
+              try {
+                const Purchases = require('react-native-purchases').default;
+                await Purchases.logOut();
+              } catch (err) {
+                console.warn('Failed to log out RevenueCat:', err);
+              }
+            }
+            
+            haptics.success();
+            Alert.alert('Reset Complete', 'Workspace and subscription cache have been reset.');
+          }
+        }
+      ]
+    );
   };
 
   return (
@@ -186,10 +235,22 @@ export default function SettingsScreen() {
         </TouchableOpacity>
       </View>
 
+      {/* 5. Developer Options */}
+      {devModeEnabled && (
+        <View style={styles.section}>
+          <Text style={styles.sectionHeader}>Developer Options</Text>
+          <TouchableOpacity style={styles.rowButton} onPress={handleResetAll}>
+            <Text style={[styles.rowButtonLabel, { color: '#EF4444' }]}>Reset App & Account ID</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
       {/* Version Tag */}
-      <Text style={styles.versionTag}>
-        MockupBuilder v1.0.0 (Expo SDK 56)
-      </Text>
+      <TouchableOpacity onPress={handleVersionTap} activeOpacity={0.8}>
+        <Text style={styles.versionTag}>
+          MockupBuilder v1.0.0 (Expo SDK 56)
+        </Text>
+      </TouchableOpacity>
     </ScrollView>
     </View>
   );
