@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   GestureResponderEvent,
   Platform,
+  Image,
 } from 'react-native';
 import Svg, { Path, Line, Defs, Marker } from 'react-native-svg';
 import { useCanvasStore, AnnotationElement } from '@/store/canvasStore';
@@ -21,8 +22,21 @@ export const AnnotationLayer: React.FC<AnnotationLayerProps> = ({
   canvasWidth,
   canvasHeight,
 }) => {
-  const { annotations, updateAnnotation, deleteAnnotation, imageUri, saveHistoryState } = useCanvasStore();
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const {
+    annotations,
+    updateAnnotation,
+    deleteAnnotation,
+    imageUri,
+    saveHistoryState,
+    selectedAnnotationId: selectedId,
+    setSelectedAnnotationId: setSelectedId,
+    screenshotScale = 1.0,
+    screenshotOffsetX = 0,
+    screenshotOffsetY = 0,
+    padding = 15,
+    frameType = 'iPhone16Pro',
+  } = useCanvasStore();
+
   const [editingTextId, setEditingTextId] = useState<string | null>(null);
   const [tempText, setTempText] = useState('');
   
@@ -41,6 +55,8 @@ export const AnnotationLayer: React.FC<AnnotationLayerProps> = ({
     startScale: number;
   } | null>(null);
 
+  const lastTapRef = React.useRef<{ id: string; time: number } | null>(null);
+
   // Rotate gesture state (rotation angle)
   const [rotateGestureStart, setRotateGestureStart] = useState<{
     pageX: number;
@@ -49,6 +65,19 @@ export const AnnotationLayer: React.FC<AnnotationLayerProps> = ({
 
   const handleDragStart = (e: GestureResponderEvent, ann: AnnotationElement) => {
     saveHistoryState();
+    
+    // Double tap check using mutable ref to avoid React state closure delays
+    const now = Date.now();
+    const lastTap = lastTapRef.current;
+    if (lastTap && lastTap.id === ann.id && now - lastTap.time < 300) {
+      if (ann.type === 'Text') {
+        startEditText(ann);
+      }
+      lastTapRef.current = null;
+      return;
+    }
+    lastTapRef.current = { id: ann.id, time: now };
+
     setDragStart({
       pageX: e.nativeEvent.pageX,
       pageY: e.nativeEvent.pageY,
@@ -223,17 +252,6 @@ export const AnnotationLayer: React.FC<AnnotationLayerProps> = ({
 
   return (
     <View style={[StyleSheet.absoluteFill, { pointerEvents: 'box-none' }]} pointerEvents="box-none">
-      {/* Background deselect trigger */}
-      {selectedId && (
-        <TouchableOpacity
-          activeOpacity={1}
-          style={StyleSheet.absoluteFill}
-          onPress={() => {
-            setSelectedId(null);
-            haptics.lightImpact();
-          }}
-        />
-      )}
       {annotations.map((ann) => {
         const isSelected = selectedId === ann.id;
         const isEditing = editingTextId === ann.id;
@@ -280,6 +298,16 @@ export const AnnotationLayer: React.FC<AnnotationLayerProps> = ({
                     <Text 
                       style={[styles.badgeText, { color: ann.color, fontFamily: getFontFamily(ann.fontFamily) }]}
                       onLongPress={() => startEditText(ann)}
+                      onPress={() => {
+                        const now = Date.now();
+                        const lastTap = lastTapRef.current;
+                        if (lastTap && lastTap.id === ann.id && now - lastTap.time < 300) {
+                          startEditText(ann);
+                          lastTapRef.current = null;
+                        } else {
+                          lastTapRef.current = { id: ann.id, time: now };
+                        }
+                      }}
                     >
                       {ann.text}
                     </Text>
@@ -287,28 +315,38 @@ export const AnnotationLayer: React.FC<AnnotationLayerProps> = ({
                 </View>
 
                 {/* Handles */}
-                {isSelected && (
-                  <>
-                    <View 
-                      style={styles.rotateHandleContainer}
-                      onStartShouldSetResponder={() => true}
-                      onResponderGrant={(e) => handleRotateStart(e, ann)}
-                      onResponderMove={(e) => handleRotateMove(e, ann.id)}
-                      onResponderRelease={handleRotateRelease}
-                    >
-                      <View style={styles.rotateHandleLine} />
-                      <View style={styles.rotateHandleDot} />
-                    </View>
+                <View 
+                  style={[
+                    styles.rotateHandleContainer, 
+                    { 
+                      opacity: isSelected ? 1 : 0,
+                      pointerEvents: isSelected ? 'auto' : 'none'
+                    }
+                  ]}
+                  onStartShouldSetResponder={() => isSelected}
+                  onResponderGrant={(e) => handleRotateStart(e, ann)}
+                  onResponderMove={(e) => handleRotateMove(e, ann.id)}
+                  onResponderRelease={handleRotateRelease}
+                >
+                  <View style={styles.rotateHandleLine} />
+                  <View style={styles.rotateHandleDot} />
+                </View>
 
-                    <View 
-                      style={styles.resizeHandle}
-                      onStartShouldSetResponder={() => true}
-                      onResponderGrant={(e) => handleResizeStart(e, ann)}
-                      onResponderMove={(e) => handleResizeMove(e, ann.id)}
-                      onResponderRelease={handleResizeRelease}
-                    />
-                  </>
-                )}
+                <View 
+                  style={[
+                    styles.resizeHandle,
+                    {
+                      opacity: isSelected ? 1 : 0,
+                      pointerEvents: isSelected ? 'auto' : 'none'
+                    }
+                  ]}
+                  onStartShouldSetResponder={() => isSelected}
+                  onResponderGrant={(e) => handleResizeStart(e, ann)}
+                  onResponderMove={(e) => handleResizeMove(e, ann.id)}
+                  onResponderRelease={handleResizeRelease}
+                >
+                  <View style={styles.resizeHandleVisual} />
+                </View>
               </View>
 
               {/* Toolbar */}
@@ -355,28 +393,38 @@ export const AnnotationLayer: React.FC<AnnotationLayerProps> = ({
                 </View>
 
                 {/* Handles */}
-                {isSelected && (
-                  <>
-                    <View 
-                      style={styles.rotateHandleContainer}
-                      onStartShouldSetResponder={() => true}
-                      onResponderGrant={(e) => handleRotateStart(e, ann)}
-                      onResponderMove={(e) => handleRotateMove(e, ann.id)}
-                      onResponderRelease={handleRotateRelease}
-                    >
-                      <View style={styles.rotateHandleLine} />
-                      <View style={styles.rotateHandleDot} />
-                    </View>
+                <View 
+                  style={[
+                    styles.rotateHandleContainer, 
+                    { 
+                      opacity: isSelected ? 1 : 0,
+                      pointerEvents: isSelected ? 'auto' : 'none'
+                    }
+                  ]}
+                  onStartShouldSetResponder={() => isSelected}
+                  onResponderGrant={(e) => handleRotateStart(e, ann)}
+                  onResponderMove={(e) => handleRotateMove(e, ann.id)}
+                  onResponderRelease={handleRotateRelease}
+                >
+                  <View style={styles.rotateHandleLine} />
+                  <View style={styles.rotateHandleDot} />
+                </View>
 
-                    <View 
-                      style={styles.resizeHandle}
-                      onStartShouldSetResponder={() => true}
-                      onResponderGrant={(e) => handleResizeStart(e, ann)}
-                      onResponderMove={(e) => handleResizeMove(e, ann.id)}
-                      onResponderRelease={handleResizeRelease}
-                    />
-                  </>
-                )}
+                <View 
+                  style={[
+                    styles.resizeHandle,
+                    {
+                      opacity: isSelected ? 1 : 0,
+                      pointerEvents: isSelected ? 'auto' : 'none'
+                    }
+                  ]}
+                  onStartShouldSetResponder={() => isSelected}
+                  onResponderGrant={(e) => handleResizeStart(e, ann)}
+                  onResponderMove={(e) => handleResizeMove(e, ann.id)}
+                  onResponderRelease={handleResizeRelease}
+                >
+                  <View style={styles.resizeHandleVisual} />
+                </View>
               </View>
 
               {/* Toolbar */}
@@ -390,11 +438,30 @@ export const AnnotationLayer: React.FC<AnnotationLayerProps> = ({
           const lensRadius = 40; // 80px diameter
           const zoom = ann.zoomFactor || 1.5;
 
-          const bgWidth = canvasWidth * zoom * 0.85;
-          const bgHeight = canvasHeight * zoom * 0.92;
+          const getBezelRatios = () => {
+            switch (frameType) {
+              case 'iPhone16Pro':
+                return { w: 0.85, h: 0.92 };
+              case 'MacbookPro':
+              case 'SafariBrowser':
+                return { w: 0.90, h: 0.80 };
+              case 'None':
+              default:
+                return { w: 0.90, h: 0.90 };
+            }
+          };
+
+          const paddingFactor = 1 - (padding * 2) / 100;
+          const bezelRatio = getBezelRatios();
           
-          const offsetLeft = -(ann.x / 100) * bgWidth + lensRadius;
-          const offsetTop = -(ann.y / 100) * bgHeight + lensRadius;
+          const bgWidth = canvasWidth * paddingFactor * bezelRatio.w * zoom;
+          const bgHeight = canvasHeight * paddingFactor * bezelRatio.h * zoom;
+
+          const screenshotLeft = (canvasWidth * (1 - paddingFactor * bezelRatio.w)) / 2;
+          const screenshotTop = (canvasHeight * (1 - paddingFactor * bezelRatio.h)) / 2;
+
+          const offsetLeft = -((ann.x / 100) * canvasWidth - screenshotLeft) * zoom + lensRadius;
+          const offsetTop = -((ann.y / 100) * canvasHeight - screenshotTop) * zoom + lensRadius;
 
           return (
             <View key={ann.id} style={[elementStyle, styles.draggableContainer, { width: 80, height: 80 }]}>
@@ -404,45 +471,66 @@ export const AnnotationLayer: React.FC<AnnotationLayerProps> = ({
                   onResponderGrant={(e) => handleDragStart(e, ann)}
                   onResponderMove={(e) => handleDragMove(e, ann.id)}
                   onResponderRelease={handleDragRelease}
-                  style={styles.spotlightLens}
+                  style={[styles.spotlightLens, { borderColor: ann.color || '#ffffff' }]}
                 >
                   {imageUri ? (
                     <View style={styles.magnifiedViewport}>
                       <View style={[styles.magnifiedImageWrapper, { width: bgWidth, height: bgHeight, marginLeft: offsetLeft, marginTop: offsetTop }]}>
-                        <View style={{ width: '100%', height: '100%', borderRadius: 8, overflow: 'hidden' }}>
-                          <Text style={{ display: 'none' }} />
-                          <View style={styles.magnifierCircleOverlay} />
-                        </View>
+                        <Image
+                          source={{ uri: imageUri }}
+                          style={[
+                            { width: '100%', height: '100%' },
+                            {
+                              transform: [
+                                { scale: screenshotScale },
+                                { translateX: screenshotOffsetX * zoom },
+                                { translateY: screenshotOffsetY * zoom },
+                              ],
+                            },
+                          ]}
+                          resizeMode="cover"
+                        />
+                        <View style={styles.magnifierCircleOverlay} />
                       </View>
                     </View>
                   ) : (
-                    <View style={styles.lensGridFallback} />
+                    <View style={[styles.lensGridFallback, { borderColor: ann.color || '#ffffff' }]} />
                   )}
                 </View>
 
                 {/* Handles */}
-                {isSelected && (
-                  <>
-                    <View 
-                      style={styles.rotateHandleContainer}
-                      onStartShouldSetResponder={() => true}
-                      onResponderGrant={(e) => handleRotateStart(e, ann)}
-                      onResponderMove={(e) => handleRotateMove(e, ann.id)}
-                      onResponderRelease={handleRotateRelease}
-                    >
-                      <View style={styles.rotateHandleLine} />
-                      <View style={styles.rotateHandleDot} />
-                    </View>
+                <View 
+                  style={[
+                    styles.rotateHandleContainer, 
+                    { 
+                      opacity: isSelected ? 1 : 0,
+                      pointerEvents: isSelected ? 'auto' : 'none'
+                    }
+                  ]}
+                  onStartShouldSetResponder={() => isSelected}
+                  onResponderGrant={(e) => handleRotateStart(e, ann)}
+                  onResponderMove={(e) => handleRotateMove(e, ann.id)}
+                  onResponderRelease={handleRotateRelease}
+                >
+                  <View style={styles.rotateHandleLine} />
+                  <View style={styles.rotateHandleDot} />
+                </View>
 
-                    <View 
-                      style={styles.resizeHandle}
-                      onStartShouldSetResponder={() => true}
-                      onResponderGrant={(e) => handleResizeStart(e, ann)}
-                      onResponderMove={(e) => handleResizeMove(e, ann.id)}
-                      onResponderRelease={handleResizeRelease}
-                    />
-                  </>
-                )}
+                <View 
+                  style={[
+                    styles.resizeHandle,
+                    {
+                      opacity: isSelected ? 1 : 0,
+                      pointerEvents: isSelected ? 'auto' : 'none'
+                    }
+                  ]}
+                  onStartShouldSetResponder={() => isSelected}
+                  onResponderGrant={(e) => handleResizeStart(e, ann)}
+                  onResponderMove={(e) => handleResizeMove(e, ann.id)}
+                  onResponderRelease={handleResizeRelease}
+                >
+                  <View style={styles.resizeHandleVisual} />
+                </View>
               </View>
 
               {/* Toolbar */}
@@ -474,25 +562,34 @@ const styles = StyleSheet.create({
   },
   resizeHandle: {
     position: 'absolute',
-    right: -6,
-    bottom: -6,
+    right: -22,
+    bottom: -22,
+    width: 44,
+    height: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 300,
+    cursor: 'se-resize' as any,
+  },
+  resizeHandleVisual: {
     width: 14,
     height: 14,
     borderRadius: 7,
     backgroundColor: '#38BDF8',
     borderWidth: 2,
     borderColor: '#ffffff',
-    zIndex: 300,
   },
   rotateHandleContainer: {
     position: 'absolute',
-    top: -24,
+    top: -34,
     left: '50%',
-    marginLeft: -7,
-    width: 14,
-    height: 24,
+    marginLeft: -22,
+    width: 44,
+    height: 44,
     alignItems: 'center',
+    justifyContent: 'center',
     zIndex: 300,
+    cursor: 'grab' as any,
   },
   rotateHandleLine: {
     width: 1.5,
@@ -516,6 +613,7 @@ const styles = StyleSheet.create({
     minWidth: 100,
     alignItems: 'center',
     justifyContent: 'center',
+    cursor: 'move' as any,
   },
   badgeText: {
     fontSize: 13,
@@ -560,6 +658,7 @@ const styles = StyleSheet.create({
     borderRadius: 40,
     justifyContent: 'center',
     alignItems: 'center',
+    cursor: 'move' as any,
   },
   // Spotlight / Magnifying Lens Styles
   spotlightLens: {
@@ -572,6 +671,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     justifyContent: 'center',
     alignItems: 'center',
+    cursor: 'move' as any,
   },
   magnifiedViewport: {
     width: '100%',

@@ -80,6 +80,7 @@ export interface CanvasState {
   backgroundImageUri: string | null;
   feedMode: 'None' | 'Twitter' | 'LinkedIn' | 'ProductHunt';
   hasBorderGlow: boolean;
+  selectedAnnotationId: string | null;
 
   // History stacks (in-memory)
   undoStack: CanvasSnapshot[];
@@ -109,6 +110,7 @@ export interface CanvasState {
   setBackgroundImageUri: (uri: string | null) => void;
   setFeedMode: (mode: 'None' | 'Twitter' | 'LinkedIn' | 'ProductHunt') => void;
   setHasBorderGlow: (glow: boolean) => void;
+  setSelectedAnnotationId: (id: string | null) => void;
   
   // History Actions
   saveHistoryState: () => void;
@@ -224,6 +226,7 @@ export const useCanvasStore = create<CanvasState>()(
       backgroundImageUri: null,
       feedMode: 'None',
       hasBorderGlow: false,
+      selectedAnnotationId: null,
 
       // History stacks
       undoStack: [],
@@ -384,6 +387,8 @@ export const useCanvasStore = create<CanvasState>()(
       }),
 
       setProStatus: (status) => set({ isPro: status }),
+
+      setSelectedAnnotationId: (id) => set({ selectedAnnotationId: id }),
 
       setShowNotch: (show) => set((state) => {
         const snapshot = takeSnapshot(state);
@@ -563,7 +568,7 @@ export const useCanvasStore = create<CanvasState>()(
       storage: createJSONStorage(() => customStorage),
       // Prevent undoStack and redoStack from bloating the persistent local storage
       partialize: (state) => {
-        const { undoStack, redoStack, ...rest } = state;
+        const { undoStack, redoStack, selectedAnnotationId, ...rest } = state;
         return rest;
       },
     }

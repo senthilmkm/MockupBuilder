@@ -17,7 +17,7 @@ export const BeforeAfterSlider: React.FC = () => {
     beforeScreenshotOffsetY = 0,
   } = useCanvasStore();
   const [parentDimensions, setParentDimensions] = useState({ width: 0, height: 0 });
-  const [dragStart, setDragStart] = useState<{ pageX: number; sliderPosition: number } | null>(null);
+  const dragStartRef = React.useRef<{ pageX: number; sliderPosition: number } | null>(null);
 
   const onLayout = (e: any) => {
     const { width, height } = e.nativeEvent.layout;
@@ -109,13 +109,18 @@ export const BeforeAfterSlider: React.FC = () => {
           onMoveShouldSetResponder={() => true}
           onResponderTerminationRequest={() => false}
           onResponderGrant={(e) => {
-            setDragStart({
+            const selectId = useCanvasStore.getState().selectedAnnotationId;
+            if (selectId) {
+              useCanvasStore.getState().setSelectedAnnotationId(null);
+            }
+            dragStartRef.current = {
               pageX: e.nativeEvent.pageX,
               sliderPosition: sliderPosition,
-            });
+            };
             haptics.lightImpact();
           }}
           onResponderMove={(e) => {
+            const dragStart = dragStartRef.current;
             if (!dragStart) return;
             const deltaX = e.nativeEvent.pageX - dragStart.pageX;
             const deltaPercent = (deltaX / pWidth) * 100;
@@ -124,11 +129,11 @@ export const BeforeAfterSlider: React.FC = () => {
             haptics.selection();
           }}
           onResponderRelease={() => {
-            setDragStart(null);
+            dragStartRef.current = null;
             haptics.selection();
           }}
           onResponderTerminate={() => {
-            setDragStart(null);
+            dragStartRef.current = null;
           }}
         >
           {/* Grab Handle UI */}

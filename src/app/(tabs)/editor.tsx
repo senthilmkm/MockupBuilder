@@ -90,6 +90,14 @@ export default function EditorScreen() {
     setHasBorderGlow,
   } = useCanvasStore();
 
+  const [localHexInput, setLocalHexInput] = useState(backgroundColor.startsWith('#') ? backgroundColor : '');
+
+  React.useEffect(() => {
+    if (backgroundColor.startsWith('#')) {
+      setLocalHexInput(backgroundColor);
+    }
+  }, [backgroundColor]);
+
   const handleCanvasLayout = (e: any) => {
     const { width, height } = e.nativeEvent.layout;
     setCanvasWidth(width);
@@ -559,14 +567,26 @@ export default function EditorScreen() {
             <View style={styles.colorSegmentRow}>
               <TouchableOpacity
                 style={[styles.colorSegmentBtn, backgroundType === 'gradient' && styles.colorSegmentBtnActive]}
-                onPress={() => { haptics.lightImpact(); setBackgroundType('gradient'); }}
+                onPress={() => {
+                  haptics.lightImpact();
+                  setBackgroundType('gradient');
+                  if (backgroundColor.startsWith('#')) {
+                    setBackgroundColor('gradient-sunset');
+                  }
+                }}
               >
                 <Text style={[styles.colorSegmentText, backgroundType === 'gradient' && styles.colorSegmentTextActive]}>Gradients</Text>
               </TouchableOpacity>
               
               <TouchableOpacity
                 style={[styles.colorSegmentBtn, backgroundType === 'color' && styles.colorSegmentBtnActive]}
-                onPress={() => { haptics.lightImpact(); setBackgroundType('color'); }}
+                onPress={() => {
+                  haptics.lightImpact();
+                  setBackgroundType('color');
+                  if (!backgroundColor.startsWith('#')) {
+                    setBackgroundColor('#1E293B');
+                  }
+                }}
               >
                 <Text style={[styles.colorSegmentText, backgroundType === 'color' && styles.colorSegmentTextActive]}>Solids</Text>
               </TouchableOpacity>
@@ -630,15 +650,28 @@ export default function EditorScreen() {
                     style={styles.hexInput}
                     placeholder="#FFFFFF"
                     placeholderTextColor="#64748B"
-                    value={backgroundColor.startsWith('#') ? backgroundColor : ''}
+                    value={localHexInput}
                     autoCapitalize="characters"
                     onChangeText={(text) => {
-                      let hex = text;
-                      if (text.length > 0 && !text.startsWith('#')) {
-                        hex = '#' + text;
+                      let hex = text.toUpperCase();
+                      if (hex.length > 0 && !hex.startsWith('#')) {
+                        hex = '#' + hex;
                       }
                       if (hex.length <= 7) {
-                        setBackgroundColor(hex);
+                        setLocalHexInput(hex);
+                        if (/^#([0-9A-F]{3}|[0-9A-F]{6})$/i.test(hex)) {
+                          setBackgroundColor(hex);
+                        }
+                      }
+                    }}
+                    onBlur={() => {
+                      if (!/^#([0-9A-F]{3}|[0-9A-F]{6})$/i.test(localHexInput)) {
+                        setLocalHexInput(backgroundColor.startsWith('#') ? backgroundColor : '#1E293B');
+                      }
+                    }}
+                    onSubmitEditing={() => {
+                      if (!/^#([0-9A-F]{3}|[0-9A-F]{6})$/i.test(localHexInput)) {
+                        setLocalHexInput(backgroundColor.startsWith('#') ? backgroundColor : '#1E293B');
                       }
                     }}
                   />
